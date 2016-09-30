@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package mvtkvs;
+
+service Mvtkvs {
+  rpc Read(ReadRequest) returns(ReadReply);
+  rpc Write(WriteRequest) returns(WriteReply);
+  rpc P1C(PhaseOneCommitRequest) returns (PhaseOneCommitReply);
+  rpc P2C(PhaseTwoCommitRequest) returns (PhaseTwoCommitReply);
+}
+
+message ReadRequest {
+  uint64 tid = 1;
+  uint64 start_ts = 2;
+  uint64 key = 3;
+}
+
+message ReadReply {
+  bytes value = 1;
+  bool status = 2;
+}
+
+message WriteRequest {
+  uint64 tid = 1;
+  uint64 key = 2;
+  bytes value = 3;
+}
+
+message WriteReply {
+  bool status = 1;
+}
+
+message PhaseOneCommitRequest {
+  uint64 tid = 1;
+  uint64 start_ts = 2;
+  uint64 commit_ts = 3;
+  repeated uint64 read_node = 4;
+  repeated uint64 write_node = 5;
+}
+
+message PhaseOneCommitReply {
+  repeated uint64 node = 1;
+  bool vote = 2;
+}
+
+message PhaseTwoCommitRequest {
+  uint64 tid = 1;
+  bool vote = 2;
+}
+
+message PhaseTwoCommitReply {
+  repeated uint64 node = 1;
+}

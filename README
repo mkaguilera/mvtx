@@ -1,0 +1,12 @@
+MVTX: Modular Multi-Version Transactional Key-Value Storage System v0.1
+
+MVTX is a distributed key-value storage system with the following features:
+- it provides serializable transactions
+- it is highly modular, permitting experimentation with different
+  components for local storage, transactional protocol, logging, RPC, etc
+
+MVTX is a prototype currently designed for educational purposes only.
+Currently it lacks replication, but we hope to add it at some point.
+
+Please see readme-team.txt for description of files, intended for
+developers.
