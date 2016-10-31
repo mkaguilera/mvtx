@@ -8,7 +8,7 @@
 #ifndef REQUEST_H_
 #define REQUEST_H_
 
-#include <stdint.h>
+#include <cstdint>
 #include <set>
 #include <string>
 #include <vector>

@@ -241,7 +241,7 @@ void GRPCServer::nextRequest(uint64_t *rid, request_t *request, void **args) {
   RequestHandler *request_handler;
 
   _request_queue->Next(&tag, &ok);
-  GPR_ASSERT(ok);
+  assert(ok);
   request_handler = static_cast<RequestHandler *>(tag);
   *rid = reinterpret_cast<uint64_t>(tag);
   *request = request_handler->getRequest();
@@ -278,7 +278,7 @@ void GRPCServer::nextCompletedReply(uint64_t *rid) {
   bool ok;
 
   _reply_queue->Next(&tag, &ok);
-  GPR_ASSERT(ok);
+  assert(ok);
   *rid= reinterpret_cast<uint64_t> (tag);
 }
 

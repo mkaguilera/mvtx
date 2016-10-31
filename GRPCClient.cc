@@ -5,7 +5,7 @@
  *      Author: theo
  */
 
-#include <assert.h>
+#include <cassert>
 #include "GRPCClient.h"
 
 GRPCClient::RequestHandler::RequestHandler(GRPCClient *grpc_client, const std::string &addr)

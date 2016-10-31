@@ -8,7 +8,7 @@
 #ifndef TRANSACTIONIDGENERATOR_H_
 #define TRANSACTIONIDGENERATOR_H_
 
-#include <stdint.h>
+#include <cstdint>
 
 /**
  * Interface for transaction ID generators.

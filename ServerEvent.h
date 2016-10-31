@@ -8,7 +8,7 @@
 #ifndef SERVEREVENT_H_
 #define SERVEREVENT_H_
 
-#include <stdint.h>
+#include <cstdint>
 #include "Request.h"
 
 class TServer;

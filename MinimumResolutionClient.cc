@@ -5,7 +5,7 @@
  *      Author: theo
  */
 
-#include <assert.h>
+#include <cassert>
 #include <set>
 #include "MinimumResolutionClient.h"
 

@@ -8,7 +8,7 @@
 #ifndef TIMESTAMPGENERATOR_H_
 #define TIMESTAMPGENERATOR_H_
 
-#include <stdint.h>
+#include <cstdint>
 
 /**
  * Interface for timestamp generators.

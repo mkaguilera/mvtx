@@ -8,7 +8,7 @@
 #ifndef KEYMAPPER_H_
 #define KEYMAPPER_H_
 
-#include <stdint.h>
+#include <cstdint>
 
 /**
  * Interface for mapper from keys to nodes.

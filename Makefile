@@ -7,7 +7,7 @@ PROTOC = protoc
 GRPC_CPP_PLUGIN = grpc_cpp_plugin
 GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
 PROTOS_PATH = ./protos
-OBJS=MvtkvsService.grpc.pb.cc MvtkvsService.pb.cc Coordinator Server SimpleLockManager
+OBJS=MvtkvsService.grpc.pb.cc MvtkvsService.pb.cc Coordinator Server AVLLockManager
 COORD_SOURCES=GRPCClient.o MinimumResolutionClient.o Coordinator.o SimpleKeyMapper.o SimpleTransactionIDGenerator.o \
               SimpleTimestampGenerator.o WithdrawCoordinator.o MvtkvsService.pb.o MvtkvsService.grpc.pb.o \
               SafeQueue.o WithdrawCoordinatorMain.o
@@ -57,11 +57,11 @@ ServerMain.o: ServerMain.cc GRPCServer.h SafeQueue.h ServerEvent.h SimpleKeyMapp
 Server : $(SERVER_SOURCES)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-AVLTreeLock.o : AVLTreeLock.h AVLTreeLock.cc
+AVLLockNode.o : AVLLockNode.h AVLLockNode.cc
 
-SimpleLockManager.o : LockManager.h SimpleLockManager.h SimpleLockManager.cc
+AVLLockManager.o : LockManager.h AVLLockManager.h AVLLockManager.cc
 
-SimpleLockManager : SimpleLockManager.o AVLTreeLock.o ServerEvent.o SimpleTServer.o SimpleKeyMapper.o SafeQueue.o \
+AVLLockManager : AVLLockManager.o AVLLockNode.o ServerEvent.o SimpleTServer.o SimpleKeyMapper.o SafeQueue.o \
                     GRPCServer.o MvtkvsService.pb.o MvtkvsService.grpc.pb.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
