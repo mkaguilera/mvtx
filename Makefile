@@ -57,12 +57,12 @@ ServerMain.o: ServerMain.cc GRPCServer.h SafeQueue.h ServerEvent.h SimpleKeyMapp
 Server : $(SERVER_SOURCES)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-AVLLockNode.o : AVLLockNode.h AVLLockNode.cc
+AVLTreeLock.o : LockStatus.h AVLTreeLock.h AVLTreeLock.cc
 
-AVLLockManager.o : LockManager.h AVLLockManager.h AVLLockManager.cc
+AVLTreeLockManager.o : Event.h LockStatus.h LockManager.h AVLTreeLockManager.h AVLTreeLockManager.cc
 
-AVLLockManager : AVLLockManager.o AVLLockNode.o ServerEvent.o SimpleTServer.o SimpleKeyMapper.o SafeQueue.o \
-                    GRPCServer.o MvtkvsService.pb.o MvtkvsService.grpc.pb.o
+AVLLockManager : AVLTreeLockManager.o AVLTreeLock.o ServerEvent.o SimpleTServer.o SimpleKeyMapper.o SafeQueue.o \
+                 GRPCServer.o MvtkvsService.pb.o MvtkvsService.grpc.pb.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 clean:

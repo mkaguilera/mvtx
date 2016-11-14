@@ -304,7 +304,7 @@ private:
 
     while (true) {
       cq->Next(&tag, &ok);
-      GPR_ASSERT(ok);
+      assert(ok);
       static_cast<Handler*>(tag)->proceed();
     }
 
