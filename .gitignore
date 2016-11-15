@@ -1,4 +1,8 @@
 .cproject
 .project
 .settings
-mvtx.doxyfile
+html/*
+latex/*
+man/*
+rtf/*
+xml/*

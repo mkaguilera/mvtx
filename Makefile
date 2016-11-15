@@ -16,7 +16,7 @@ SERVER_SOURCES=ServerMain.o ServerEvent.o SimpleTServer.o SimpleKeyMapper.o Safe
 
 vpath %.proto $(PROTOS_PATH)
 
-all: $(OBJS)
+all: $(OBJS) Doxygen
 
 %.grpc.pb.cc: %.proto
 	$(PROTOC) -I $(PROTOS_PATH) --grpc_out=. --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
@@ -64,6 +64,9 @@ AVLTreeLockManager.o : Event.h LockStatus.h LockManager.h AVLTreeLockManager.h A
 AVLLockManager : AVLTreeLockManager.o AVLTreeLock.o ServerEvent.o SimpleTServer.o SimpleKeyMapper.o SafeQueue.o \
                  GRPCServer.o MvtkvsService.pb.o MvtkvsService.grpc.pb.o
 	$(CXX) $^ $(LDFLAGS) -o $@
+
+Doxygen : mvtx.doxyfile *.h *.cc
+	doxygen mvtx.doxyfile
 
 clean:
 	$(RM) -f *.o *.pb.cc *.pb.h $(OBJS)
