@@ -29,7 +29,7 @@ using mvtkvs::PhaseTwoCommitReply;
 using mvtkvs::Mvtkvs;
 
 /**
- * Implementation of Remote Procedutre Call (RPC) client layer with Google RPC (gRPC).
+ * Implementation of Remote Procedure Call (RPC) client layer with Google RPC (gRPC).
  */
 class GRPCClient: public RPCClient
 {
