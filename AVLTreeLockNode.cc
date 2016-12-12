@@ -1,5 +1,5 @@
 /*
- * AVLTreeLock.cc
+ * AVLTreeLockNode.cc
  *
  *  Created on: Jul 25, 2016
  *      Author: theo
@@ -10,18 +10,17 @@
 #include <limits>
 #include <vector>
 
-#include "AVLTreeLock.h"
+#include "AVLTreeLockNode.h"
 #include "GRPCServer.h"
 #include "SimpleKeyMapper.h"
 #include "SimpleTServer.h"
 #include "TServer.h"
 
-AVLTreeLock::AVLTreeLock() {
-  _status = READ_LOCK;
+AVLTreeLockNode::AVLTreeLockNode() {
+  _status = FREE;
   _start = 0;
   _end = UINTMAX_MAX;
-  _tids = new std::set<uint64_t>();
-  _events = new std::set<Event *>();
+  _tids = new std::set<uint64_t> ();
   _parent = nullptr;
   _left = nullptr;
   _right = nullptr;
@@ -29,12 +28,11 @@ AVLTreeLock::AVLTreeLock() {
   _right_height = 0;
 }
 
-AVLTreeLock::AVLTreeLock(AVLTreeLock *lock) {
+AVLTreeLockNode::AVLTreeLockNode(AVLTreeLockNode *lock) {
   _status = lock->_status;
   _start = lock->_start;
   _end = lock->_end;
-  _tids = new std::set<uint64_t>(*(lock->_tids));
-  _events = new std::set<Event *>(*(lock->_events));
+  _tids = new std::set<uint64_t> (lock->_tids->begin(), lock->_tids->end());
   _parent = nullptr;
   _left = nullptr;
   _right = nullptr;
@@ -42,20 +40,17 @@ AVLTreeLock::AVLTreeLock(AVLTreeLock *lock) {
   _right_height = 0;
 }
 
-AVLTreeLock::~AVLTreeLock() {
-  _tids->clear();
+AVLTreeLockNode::~AVLTreeLockNode() {
   delete _tids;
-  _events->clear();
-  delete _events;
 }
 
-AVLTreeLock *AVLTreeLock::getRoot() {
+AVLTreeLockNode *AVLTreeLockNode::getRoot() {
   if (_parent != nullptr)
     return _parent->getRoot();
   return this;
 }
 
-void AVLTreeLock::updateHeight() {
+void AVLTreeLockNode::updateHeight() {
   _left_height =
       _left == nullptr ?
           0 : (_left->_left_height >= _left->_right_height ? _left->_left_height + 1 : _left->_right_height + 1);
@@ -64,8 +59,8 @@ void AVLTreeLock::updateHeight() {
           0 : (_right->_left_height >= _right->_right_height ? _right->_left_height + 1 : _right->_right_height + 1);
 }
 
-void AVLTreeLock::swap(bool is_left) {
-  AVLTreeLock *child = is_left ? _left : _right;
+void AVLTreeLockNode::swap(bool is_left) {
+  AVLTreeLockNode *child = is_left ? _left : _right;
   std::string child_str = is_left ? "left" : "right";
 
   if (child == nullptr) {
@@ -95,8 +90,8 @@ void AVLTreeLock::swap(bool is_left) {
   child->updateHeight();
 }
 
-void AVLTreeLock::balance() {
-  AVLTreeLock *parent = _parent;
+void AVLTreeLockNode::balance() {
+  AVLTreeLockNode *parent = _parent;
   int diff;
 
   updateHeight();
@@ -124,7 +119,7 @@ void AVLTreeLock::balance() {
     parent->balance();
 }
 
-void AVLTreeLock::find(std::vector<AVLTreeLock*> *locks, uint64_t ts) {
+void AVLTreeLockNode::find(std::vector<AVLTreeLockNode*> *locks, uint64_t ts) {
   if (ts < _start) {
     if (_left != nullptr)
       _left->find(locks,ts);
@@ -138,7 +133,7 @@ void AVLTreeLock::find(std::vector<AVLTreeLock*> *locks, uint64_t ts) {
   }
 }
 
-AVLTreeLock *AVLTreeLock::insert(AVLTreeLock *new_lock) {
+AVLTreeLockNode *AVLTreeLockNode::insert(AVLTreeLockNode *new_lock) {
   if (new_lock->_start < _start) {
     if (_left == nullptr) {
       _left = new_lock;
@@ -159,10 +154,10 @@ AVLTreeLock *AVLTreeLock::insert(AVLTreeLock *new_lock) {
   return getRoot();
 }
 
-AVLTreeLock *AVLTreeLock::remove() {
+AVLTreeLockNode *AVLTreeLockNode::remove() {
   if (_left != nullptr) {
-    AVLTreeLock *new_lock = _left;
-    AVLTreeLock *parent;
+    AVLTreeLockNode *new_lock = _left;
+    AVLTreeLockNode *parent;
 
     while (new_lock->_right != nullptr)
       new_lock = new_lock->_right;
@@ -220,7 +215,7 @@ AVLTreeLock *AVLTreeLock::remove() {
   return getRoot();
 }
 
-std::string AVLTreeLock::toString() {
+std::string AVLTreeLockNode::toString() {
   std::string res = "";
 
   res += "Interval: [" + std::to_string(_start) + "," + std::to_string(_end) + "]\n";
@@ -230,22 +225,10 @@ std::string AVLTreeLock::toString() {
       res += "FREE";
       break;
     case READ_LOCK:
-      res += "READ_LOCK\n";
-      res += "Transaction IDs:";
-      for (std::set<uint64_t>::iterator it = _tids->begin(); it != _tids->end(); ++it)
-        res += " " + std::to_string(*it);
-      res += "\nEvents:";
-      for (std::set<Event *>::iterator it = _events->begin(); it != _events->end(); ++it)
-        res += " " + std::to_string(reinterpret_cast<uint64_t>(*it));
+      res += "READ_LOCK";
       break;
     case WRITE_LOCK:
-      res += "WRITE_LOCK\n";
-      res += "Transaction IDs:";
-      for (std::set<uint64_t>::iterator it = _tids->begin(); it != _tids->end(); ++it)
-        res += " " + std::to_string(*it);
-      res += "\nEvents:";
-      for (std::set<Event *>::iterator it = _events->begin(); it != _events->end(); ++it)
-        res += " " + std::to_string(reinterpret_cast<uint64_t>(*it));
+      res += "WRITE_LOCK";
       break;
     case FREEZE_READ_LOCK:
       res += "FREEZE_READ_LOCK";
@@ -259,10 +242,8 @@ std::string AVLTreeLock::toString() {
   }
   res += "\n";
   res += "Height: (" + std::to_string(_left_height) + "," + std::to_string(_right_height) + ")\n";
-
   if (_left != nullptr)
     res += "\n" + _left->toString();
-
   if (_right != nullptr)
     res += "\n" + _right->toString();
   return res;

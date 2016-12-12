@@ -1,4 +1,4 @@
-/**
+/*
  * Coordinator.cc
  *
  *  Created on: Jun 15, 2016
@@ -9,8 +9,8 @@
 
 Coordinator::Coordinator(ResolutionClient *rsl_client, KeyMapper *key_mapper, TransactionIDGenerator *id_gen,
     TimestampGenerator *ts_gen)
-    : _rsl_client(rsl_client), _key_mapper(key_mapper), _id_gen(id_gen), _ts_gen(ts_gen) {
-  _tid = _id_gen->genTransactionID();
+    : _rsl_client(rsl_client), _key_mapper(key_mapper), _ts_gen(ts_gen) {
+  _tid = id_gen->genTransactionID();
   _start_ts = _ts_gen->genStartTimestamp();
 }
 

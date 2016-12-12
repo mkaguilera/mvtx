@@ -7,7 +7,7 @@ PROTOC = protoc
 GRPC_CPP_PLUGIN = grpc_cpp_plugin
 GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
 PROTOS_PATH = ./protos
-OBJS=MvtkvsService.grpc.pb.cc MvtkvsService.pb.cc Coordinator Server AVLLockManager
+OBJS=MvtkvsService.grpc.pb.cc MvtkvsService.pb.cc Coordinator Server
 COORD_SOURCES=GRPCClient.o MinimumResolutionClient.o Coordinator.o SimpleKeyMapper.o SimpleTransactionIDGenerator.o \
               SimpleTimestampGenerator.o WithdrawCoordinator.o MvtkvsService.pb.o MvtkvsService.grpc.pb.o \
               SafeQueue.o WithdrawCoordinatorMain.o
@@ -16,7 +16,9 @@ SERVER_SOURCES=ServerMain.o ServerEvent.o SimpleTServer.o SimpleKeyMapper.o Safe
 
 vpath %.proto $(PROTOS_PATH)
 
-all: $(OBJS) Doxygen
+all: Doxygen $(OBJS) test
+
+test: RunTests
 
 %.grpc.pb.cc: %.proto
 	$(PROTOC) -I $(PROTOS_PATH) --grpc_out=. --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
@@ -57,16 +59,25 @@ ServerMain.o: ServerMain.cc GRPCServer.h SafeQueue.h ServerEvent.h SimpleKeyMapp
 Server : $(SERVER_SOURCES)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-AVLTreeLock.o : LockStatus.h AVLTreeLock.h AVLTreeLock.cc
+AVLTreeLockNode.o : LockStatus.h AVLTreeLockNode.h AVLTreeLockNode.cc
 
 AVLTreeLockManager.o : Event.h LockStatus.h LockManager.h AVLTreeLockManager.h AVLTreeLockManager.cc
 
-AVLLockManager : AVLTreeLockManager.o AVLTreeLock.o ServerEvent.o SimpleTServer.o SimpleKeyMapper.o SafeQueue.o \
-                 GRPCServer.o MvtkvsService.pb.o MvtkvsService.grpc.pb.o
+TestEvent.o : Event.h TestEvent.h TestEvent.cc
+
+LockManagerTest.o : Test.h LockManagerTest.h LockManagerTest.cc
+
+RPCTest.o : Test.h RPCTest.h RPCTest.cc
+
+RunTests.o : LockManager.h RPCClient.h RPCServer.h RunTests.cc
+
+RunTests : AVLTreeLockManager.o AVLTreeLockNode.o TestEvent.o ServerEvent.o SimpleTServer.o \
+           SimpleKeyMapper.o SafeQueue.o GRPCServer.o MvtkvsService.pb.o MvtkvsService.grpc.pb.o LockManagerTest.o \
+           RunTests.o GRPCClient.o RPCTest.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 Doxygen : mvtx.doxyfile *.h *.cc
 	doxygen mvtx.doxyfile
 
 clean:
-	$(RM) -f *.o *.pb.cc *.pb.h $(OBJS)
+	$(RM) -r -f *.o *.pb.cc *.pb.h $(OBJS) RunTests html latex

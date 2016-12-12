@@ -1,4 +1,4 @@
-/**
+/*
  * GRPCServer.cc
  *
  *  Created on: Jun 21, 2016
@@ -20,7 +20,7 @@ GRPCServer::RequestHandler::~RequestHandler() {
   }
 }
 
-GRPCServer::ReadHandler::ReadHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *request_queue,
+GRPCServer::ReadRequestHandler::ReadRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *request_queue,
                                      ServerCompletionQueue *reply_queue)
     : RequestHandler(service, request_queue, reply_queue), _responder(&_ctx) {
   _rpc_read_args.read_args = (read_args_t *) malloc(sizeof(read_args_t));
@@ -28,11 +28,11 @@ GRPCServer::ReadHandler::ReadHandler(Mvtkvs::AsyncService *service, ServerComple
   _service->RequestRead(&_ctx, &_request, &_responder, reply_queue, request_queue, this);
 }
 
-GRPCServer::ReadHandler::~ReadHandler() {
+GRPCServer::ReadRequestHandler::~ReadRequestHandler() {
   free(_rpc_read_args.read_args);
 }
 
-void GRPCServer::ReadHandler::setReply() {
+void GRPCServer::ReadRequestHandler::setReply() {
   ReadReply read_reply;
 
   if (_status != PROCESS) {
@@ -45,7 +45,7 @@ void GRPCServer::ReadHandler::setReply() {
   _responder.Finish(read_reply, Status::OK, this);
 }
 
-request_t GRPCServer::ReadHandler::getRequest() {
+request_t GRPCServer::ReadRequestHandler::getRequest() {
   if (_status != PROCESS) {
     std::cerr << "Status should have been " << PROCESS << " instead of " << _status << "." << std::endl;
     exit(1);
@@ -53,7 +53,7 @@ request_t GRPCServer::ReadHandler::getRequest() {
   return READ;
 }
 
-void *GRPCServer::ReadHandler::getArgs() {
+void *GRPCServer::ReadRequestHandler::getArgs() {
   if (_status != PROCESS) {
     std::cerr << "Status should have been 1 instead of " << _status << "." << std::endl;
     exit(1);
@@ -64,7 +64,7 @@ void *GRPCServer::ReadHandler::getArgs() {
   return &_rpc_read_args;
 }
 
-GRPCServer::WriteHandler::WriteHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *request_queue,
+GRPCServer::WriteRequestHandler::WriteRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *request_queue,
                                        ServerCompletionQueue *reply_queue)
     : RequestHandler(service, request_queue, reply_queue), _responder(&_ctx) {
   _rpc_write_args.write_args = (write_args_t *) malloc(sizeof(write_args_t));
@@ -73,12 +73,12 @@ GRPCServer::WriteHandler::WriteHandler(Mvtkvs::AsyncService *service, ServerComp
   _service->RequestWrite(&_ctx, &_request, &_responder, reply_queue, request_queue, this);
 }
 
-GRPCServer::WriteHandler::~WriteHandler() {
+GRPCServer::WriteRequestHandler::~WriteRequestHandler() {
   delete _rpc_write_args.write_args->value;
   free(_rpc_write_args.write_args);
 }
 
-void GRPCServer::WriteHandler::setReply() {
+void GRPCServer::WriteRequestHandler::setReply() {
   WriteReply write_reply;
 
   if (_status != PROCESS) {
@@ -90,7 +90,7 @@ void GRPCServer::WriteHandler::setReply() {
   _responder.Finish(write_reply, Status::OK, this);
 }
 
-request_t GRPCServer::WriteHandler::getRequest() {
+request_t GRPCServer::WriteRequestHandler::getRequest() {
   if (_status != PROCESS) {
     std::cerr << "Status should have been 1 instead of " << _status << "." << std::endl;
     exit(1);
@@ -98,7 +98,7 @@ request_t GRPCServer::WriteHandler::getRequest() {
   return WRITE;
 }
 
-void *GRPCServer::WriteHandler::getArgs() {
+void *GRPCServer::WriteRequestHandler::getArgs() {
   if (_status != PROCESS) {
     std::cerr << "Status should have been 1 instead of " << _status << "." << std::endl;
     exit(1);
@@ -109,7 +109,7 @@ void *GRPCServer::WriteHandler::getArgs() {
   return &_rpc_write_args;
 }
 
-GRPCServer::PhaseOneCommitHandler::PhaseOneCommitHandler(Mvtkvs::AsyncService *service,
+GRPCServer::PhaseOneCommitRequestHandler::PhaseOneCommitRequestHandler(Mvtkvs::AsyncService *service,
                                                          ServerCompletionQueue *request_queue,
                                                          ServerCompletionQueue *reply_queue)
     : RequestHandler(service, request_queue, reply_queue), _responder(&_ctx) {
@@ -121,14 +121,14 @@ GRPCServer::PhaseOneCommitHandler::PhaseOneCommitHandler(Mvtkvs::AsyncService *s
   _service->RequestP1C(&_ctx, &_request, &_responder, reply_queue, request_queue, this);
 }
 
-GRPCServer::PhaseOneCommitHandler::~PhaseOneCommitHandler() {
+GRPCServer::PhaseOneCommitRequestHandler::~PhaseOneCommitRequestHandler() {
   delete _rpc_p1c_args.p1c_args->read_nodes;
   delete _rpc_p1c_args.p1c_args->write_nodes;
   free(_rpc_p1c_args.p1c_args);
   delete _rpc_p1c_args.nodes;
 }
 
-void GRPCServer::PhaseOneCommitHandler::setReply() {
+void GRPCServer::PhaseOneCommitRequestHandler::setReply() {
   PhaseOneCommitReply p1c_reply;
 
   if (_status != PROCESS) {
@@ -142,7 +142,7 @@ void GRPCServer::PhaseOneCommitHandler::setReply() {
   _responder.Finish(p1c_reply, Status::OK, this);
 }
 
-request_t GRPCServer::PhaseOneCommitHandler::getRequest() {
+request_t GRPCServer::PhaseOneCommitRequestHandler::getRequest() {
   if (_status != PROCESS) {
     std::cerr << "Status should have been 1 instead of " << _status << "." << std::endl;
     exit(1);
@@ -150,7 +150,7 @@ request_t GRPCServer::PhaseOneCommitHandler::getRequest() {
   return P1C;
 }
 
-void *GRPCServer::PhaseOneCommitHandler::getArgs() {
+void *GRPCServer::PhaseOneCommitRequestHandler::getArgs() {
   if (_status != PROCESS) {
     std::cerr << "Status should have been 1 instead of " << _status << "." << std::endl;
     exit(1);
@@ -165,7 +165,7 @@ void *GRPCServer::PhaseOneCommitHandler::getArgs() {
   return &_rpc_p1c_args;
 }
 
-GRPCServer::PhaseTwoCommitHandler::PhaseTwoCommitHandler(Mvtkvs::AsyncService *service,
+GRPCServer::PhaseTwoCommitRequestHandler::PhaseTwoCommitRequestHandler(Mvtkvs::AsyncService *service,
                                                          ServerCompletionQueue *request_queue,
                                                          ServerCompletionQueue *reply_queue)
     : RequestHandler(service, request_queue, reply_queue), _responder(&_ctx) {
@@ -175,12 +175,12 @@ GRPCServer::PhaseTwoCommitHandler::PhaseTwoCommitHandler(Mvtkvs::AsyncService *s
   _service->RequestP2C(&_ctx, &_request, &_responder, reply_queue, request_queue, this);
 }
 
-GRPCServer::PhaseTwoCommitHandler::~PhaseTwoCommitHandler() {
+GRPCServer::PhaseTwoCommitRequestHandler::~PhaseTwoCommitRequestHandler() {
   free(_rpc_p2c_args.p2c_args);
   delete _rpc_p2c_args.nodes;
 }
 
-void GRPCServer::PhaseTwoCommitHandler::setReply() {
+void GRPCServer::PhaseTwoCommitRequestHandler::setReply() {
   PhaseTwoCommitReply p2c_reply;
 
   if (_status != PROCESS) {
@@ -193,7 +193,7 @@ void GRPCServer::PhaseTwoCommitHandler::setReply() {
   _responder.Finish(p2c_reply, Status::OK, this);
 }
 
-request_t GRPCServer::PhaseTwoCommitHandler::getRequest() {
+request_t GRPCServer::PhaseTwoCommitRequestHandler::getRequest() {
   if (_status != PROCESS) {
     std::cerr << "Status should have been 1 instead of " << _status << "." << std::endl;
     exit(1);
@@ -201,7 +201,7 @@ request_t GRPCServer::PhaseTwoCommitHandler::getRequest() {
   return P2C;
 }
 
-void *GRPCServer::PhaseTwoCommitHandler::getArgs() {
+void *GRPCServer::PhaseTwoCommitRequestHandler::getArgs() {
   if (_status != PROCESS) {
     std::cerr << "Status should have been 1 instead of " << _status << "." << std::endl;
     exit(1);
@@ -223,10 +223,10 @@ GRPCServer::GRPCServer(int port)
   _server = builder.BuildAndStart();
   std::cout << "Server listening on " << server_address << std::endl;
 
-  new ReadHandler(&_service, _request_queue.get(), _reply_queue.get());
-  new WriteHandler(&_service, _request_queue.get(), _reply_queue.get());
-  new PhaseOneCommitHandler(&_service, _request_queue.get(), _reply_queue.get());
-  new PhaseTwoCommitHandler(&_service, _request_queue.get(), _reply_queue.get());
+  new ReadRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
+  new WriteRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
+  new PhaseOneCommitRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
+  new PhaseTwoCommitRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
 }
 
 GRPCServer::~GRPCServer() {
@@ -300,16 +300,16 @@ void GRPCServer::deleteRequest(uint64_t rid) {
 void GRPCServer::prepareNextRequest(request_t request) {
   switch (request) {
     case (READ):
-      new ReadHandler(&_service, _request_queue.get(), _reply_queue.get());
+      new ReadRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
       break;
     case (WRITE):
-      new WriteHandler(&_service, _request_queue.get(), _reply_queue.get());
+      new WriteRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
       break;
     case (P1C):
-      new PhaseOneCommitHandler(&_service, _request_queue.get(), _reply_queue.get());
+      new PhaseOneCommitRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
       break;
     case (P2C):
-      new PhaseTwoCommitHandler(&_service, _request_queue.get(), _reply_queue.get());
+      new PhaseTwoCommitRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
       break;
   }
 }

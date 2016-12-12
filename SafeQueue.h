@@ -1,4 +1,4 @@
-/**
+/*
  * SafeQueue.h
  *
  *  Created on: Jun 16, 2016

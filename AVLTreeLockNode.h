@@ -1,12 +1,12 @@
 /*
- * AVLTreeLock.h
+ * AVLTreeLockNode.h
  *
  *  Created on: Jul 25, 2016
  *      Author: theo
  */
 
-#ifndef AVLTREELOCK_H_
-#define AVLTREELOCK_H_
+#ifndef AVLTREELOCKNODE_H_
+#define AVLTREELOCKNODE_H_
 
 #include <cstdint>
 #include <set>
@@ -17,9 +17,9 @@
 #include "LockStatus.h"
 
 /**
- * Tree implementation for the AVLTreeLock implementing the logic behind the AVLTreeLockManager.
+ * Tree implementation for the AVLTreeLockNode implementing the logic behind the AVLTreeLockManager.
  */
-class AVLTreeLock
+class AVLTreeLockNode
 {
   public:
     ///> Status of the current node.
@@ -28,10 +28,8 @@ class AVLTreeLock
     uint64_t _start;
     ///> Ending point of associated time interval.
     uint64_t _end;
-    ///> Transactions that have locked the root node. Only filled when status is READ_LOCK or WRITE_LOCK.
+    ///> Transaction IDs that keep a lock on this node.
     std::set<uint64_t> *_tids;
-    ///> Events that should be triggered if node is frozen or unlocked. Only filled when status is WRITE_LOCK.
-    std::set<Event *> *_events;
 
   private:
     ///> Height of left subtree (root is the left child) of this node.
@@ -39,35 +37,35 @@ class AVLTreeLock
     ///> Height of right subtree (root is the right child) of this node.
     int _right_height;
     ///> Parent of this node. Null if node is the root.
-    AVLTreeLock *_parent;
+    AVLTreeLockNode *_parent;
     ///> Left child of this node. Null if there is no left child.
-    AVLTreeLock *_left;
+    AVLTreeLockNode *_left;
     ///> Right child of this node. Null if there is no left child.
-    AVLTreeLock *_right;
+    AVLTreeLockNode *_right;
 
   public:
     /**
-     * Constructor of AVLTreeLock. Initializes the tree with a root node with time interval [0,MAX_UINT].
+     * Constructor of AVLTreeLockNode. Initializes the tree with a root node with time interval [0,MAX_UINT].
      */
-    AVLTreeLock();
+    AVLTreeLockNode();
 
     /**
-     * Constructor of AVLTreeLock. It copies all the fields from another AVLTreeLock.
-     * @param lock  - AVLTreeLock to copy from.
+     * Constructor of AVLTreeLockNode. It copies all the fields from another AVLTreeLock.
+     * @param lock  - AVLTreeLockNode to copy from.
      */
-    AVLTreeLock(AVLTreeLock *lock);
+    AVLTreeLockNode(AVLTreeLockNode *lock);
 
     /**
-     * Destructor of AVLTreeLock.
+     * Destructor of AVLTreeLockNode. It destroys all transaction IDs that hold for this interval.
      */
-    ~AVLTreeLock();
+    ~AVLTreeLockNode();
 
   private:
     /**
      * Finds the root of the AVLTreeLock.
      * @return  - Root of AVLTreeLock
      */
-    AVLTreeLock *getRoot();
+    AVLTreeLockNode *getRoot();
 
     /**
      * Updates the left and right heights of this tree.
@@ -94,7 +92,7 @@ class AVLTreeLock
      * @param locks - Vector to add the corresponding nodes.
      * @param ts    - Time value for which this search is enabled.
      */
-    void find(std::vector<AVLTreeLock*> *locks, uint64_t ts);
+    void find(std::vector<AVLTreeLockNode*> *locks, uint64_t ts);
 
     /**
      * Insert a new node according to AVL tree rules. The nodes are placed in respect to the starting point of their
@@ -102,13 +100,13 @@ class AVLTreeLock
      * @param new_lock  - AVLTreeLock to be inserted in the tree.
      * @return          - Root of the corresponding AVLTreeLock.
      */
-    AVLTreeLock *insert(AVLTreeLock *new_lock);
+    AVLTreeLockNode *insert(AVLTreeLockNode *new_lock);
 
     /**
      * Remove this node from AVLTreeLock.
      * @return  - Root of the corresponding AVLTreeLock.
      */
-    AVLTreeLock *remove();
+    AVLTreeLockNode *remove();
 
     /**
      * Serialize the fields of AVLTreeLock as a string.
@@ -117,4 +115,4 @@ class AVLTreeLock
     std::string toString();
 };
 
-#endif /* AVLTREELOCK_H_ */
+#endif /* AVLTREELOCKNODE_H_ */

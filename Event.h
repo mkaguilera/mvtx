@@ -1,9 +1,10 @@
-/**
+/*
  * Event.h
  *
  *  Created on: Nov 14, 2016
  *      Author: theo
  */
+
 #ifndef EVENT_H_
 #define EVENT_H_
 
@@ -23,7 +24,7 @@ class Event
     /**
      * Code to run when event is triggered.
      */
-    virtual void Run() = 0;
+    virtual void run() = 0;
 };
 
 #endif /* EVENT_H_ */

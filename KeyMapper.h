@@ -1,4 +1,4 @@
-/**
+/*
  * KeyMapper.h
  *
  *  Created on: Jun 15, 2016
@@ -11,19 +11,24 @@
 #include <cstdint>
 
 /**
- * Interface for mapper from keys to nodes.
+ * Interface for mapping keys to logical partitions (nodes).
  */
 class KeyMapper
 {
-public:
-  virtual ~KeyMapper() {}
+  public:
+    /**
+     * Destructor of KeyMapper.
+     */
+    virtual ~KeyMapper() {
+    }
+    ;
 
-  /**
-   * Map keys to nodes.
-   * @param key - Key for which node is needed.
-   * @return    - Node for the specific key.
-   */
-  virtual uint64_t getNode(uint64_t key) = 0;
+    /**
+     * Maps keys to nodes.
+     * @param key - Key for which node is needed.
+     * @return    - Node for the specific key.
+     */
+    virtual uint64_t getNode(uint64_t key) = 0;
 };
 
 #endif /* KEYMAPPER_H_ */

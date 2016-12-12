@@ -1,4 +1,4 @@
-/**
+/*
  * GRPCClient.cc
  *
  *  Created on: Jun 7, 2016
@@ -9,7 +9,8 @@
 #include "GRPCClient.h"
 
 GRPCClient::RequestHandler::RequestHandler(GRPCClient *grpc_client, const std::string &addr)
-    : _grpc_client(grpc_client), _addr(addr), _rstatus(INIT) {
+    : _grpc_client(grpc_client), _addr(addr) {
+  _rstatus = INIT;
 }
 
 GRPCClient::RequestHandler::~RequestHandler() {
@@ -27,6 +28,8 @@ GRPCClient::ReadRequestHandler::ReadRequestHandler(GRPCClient *grpc_client, cons
           AsyncRead(&_ctx, GRPCClient::makeReadRequest(_rpc_read_args->read_args), &_cq)) {
 }
 
+GRPCClient::ReadRequestHandler::~ReadRequestHandler() {}
+
 void GRPCClient::ReadRequestHandler::proceed() {
   switch (_rstatus) {
     case INIT:
@@ -41,10 +44,6 @@ void GRPCClient::ReadRequestHandler::proceed() {
       bool ok;
 
       _cq.Next(&tag, &ok);
-
-      // assert (tag == (void *) 1);
-      // assert (ok);
-
       if (ok) {
         _rpc_read_args->status = _reply.status();
         if (_rpc_read_args->status)
@@ -62,6 +61,8 @@ GRPCClient::WriteRequestHandler::WriteRequestHandler(GRPCClient *grpc_client, co
           AsyncWrite(&_ctx, GRPCClient::makeWriteRequest(_rpc_write_args->write_args), &_cq)) {
 }
 
+GRPCClient::WriteRequestHandler::~WriteRequestHandler() {}
+
 void GRPCClient::WriteRequestHandler::proceed() {
   switch (_rstatus) {
     case INIT:
@@ -76,10 +77,6 @@ void GRPCClient::WriteRequestHandler::proceed() {
       bool ok;
 
       _cq.Next(&tag, &ok);
-
-      // assert (tag == (void *) 1);
-      // assert (ok);
-
       if (ok)
         _rpc_write_args->status = _reply.status();
       break;
@@ -93,6 +90,8 @@ GRPCClient::PhaseOneCommitRequestHandler::PhaseOneCommitRequestHandler(GRPCClien
       _reply_reader(_grpc_client->getStub(_addr)->
           AsyncP1C(&_ctx, GRPCClient::makePhaseOneCommitRequest(_rpc_p1c_args->p1c_args), &_cq)) {
 }
+
+GRPCClient::PhaseOneCommitRequestHandler::~PhaseOneCommitRequestHandler() {}
 
 void GRPCClient::PhaseOneCommitRequestHandler::proceed() {
   switch (_rstatus) {
@@ -108,10 +107,6 @@ void GRPCClient::PhaseOneCommitRequestHandler::proceed() {
       bool ok;
 
       _cq.Next(&tag, &ok);
-
-      // assert (tag == (void *) 1);
-      // assert (ok);
-
       if (ok) {
         for (int i = 0; i < _reply.node_size(); i++)
           _rpc_p1c_args->nodes->insert(_reply.node(i));
@@ -129,6 +124,8 @@ GRPCClient::PhaseTwoCommitRequestHandler::PhaseTwoCommitRequestHandler(GRPCClien
           AsyncP2C(&_ctx, GRPCClient::makePhaseTwoCommitRequest(_rpc_p2c_args->p2c_args), &_cq)) {
 }
 
+GRPCClient::PhaseTwoCommitRequestHandler::~PhaseTwoCommitRequestHandler() {}
+
 void GRPCClient::PhaseTwoCommitRequestHandler::proceed() {
   switch (_rstatus) {
     case INIT:
@@ -143,10 +140,6 @@ void GRPCClient::PhaseTwoCommitRequestHandler::proceed() {
       bool ok;
 
       _cq.Next(&tag, &ok);
-
-      // assert (tag == (void *) 1);
-      // assert (ok);
-
       if (ok)
         for (int i = 0; i < _reply.node_size(); i++)
           _rpc_p2c_args->nodes->insert(_reply.node(i));

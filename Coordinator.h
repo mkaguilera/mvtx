@@ -1,4 +1,4 @@
-/**
+/*
  * Coordinator.h
  *
  *  Created on: Jun 14, 2016
@@ -10,59 +10,79 @@
 
 #include <map>
 #include <set>
+
 #include "KeyMapper.h"
 #include "ResolutionClient.h"
 #include "TimestampGenerator.h"
 #include "TransactionIDGenerator.h"
 
 /**
- * Implementation of a transaction coordinator.
+ * Coordinator implementation for transactional systems. A Coordinator should be responsible for running one associated
+ * transaction. It makes requests to Servers and waits for the replies.
  */
 class Coordinator
 {
-protected:
-  ResolutionClient *_rsl_client;                  ///< Resolution client for this coordinator.
-  KeyMapper *_key_mapper;                         ///< Mapper from keys to nodes.
-  TransactionIDGenerator *_id_gen;                ///< Generator of transaction IDs.
-  TimestampGenerator *_ts_gen;                    ///< Generator of timestamps.
-  uint64_t _tid;                                  ///< Transaction ID.
-  uint64_t _start_ts;                             ///< Starting timestamp of this transaction.
-  std::set<uint64_t> _read_nodes;                 ///< Nodes for which there are only read operations.
-  std::set<uint64_t> _write_nodes;                ///< Nodes which are updated.
-  std::map<uint64_t, std::string> _pend_writes;   ///< Pending writes during the transaction.
+  protected:
+    ///> Resolution client for this coordinator.
+    ResolutionClient *_rsl_client;
+    ///> Map from keys to nodes.
+    KeyMapper *_key_mapper;
+    ///> Generator of timestamps.
+    TimestampGenerator *_ts_gen;
+    ///> Transaction ID.
+    uint64_t _tid;
+    ///> Starting timestamp of this transaction.
+    uint64_t _start_ts;
+    ///> Nodes for which there are only read operations.
+    std::set<uint64_t> _read_nodes;
+    ///> Nodes which are updated.
+    std::set<uint64_t> _write_nodes;
+    ///> Pending writes during the transaction.
+    std::map<uint64_t, std::string> _pend_writes;
 
-public:
-  Coordinator(ResolutionClient *rsl_client, KeyMapper *key_mapper, TransactionIDGenerator *id_gen,
-              TimestampGenerator *ts_gen);
-  virtual ~Coordinator();
+    /**
+     * Constructor of Coordinator.
+     * @param rsl_client  - Bottom layer that decides in which physical nodes the requests should go.
+     * @param key_mapper  - Map between keys and partitions.
+     * @param id_gen      - Transaction ID generator.
+     * @param ts_gen      - Timestamp generator.
+     */
+    Coordinator(ResolutionClient *rsl_client, KeyMapper *key_mapper, TransactionIDGenerator *id_gen,
+        TimestampGenerator *ts_gen);
 
-protected:
-  /**
-   * Read operation for users.
-   * @param key - Key to read from.
-   * @return    - Value that correspons to this specific key.
-   */
-  std::string read(uint64_t key);
+  public:
+    /**
+     * Destructor of Coordinator.
+     */
+    virtual ~Coordinator();
 
-  /**
-   * Write operation for users.
-   * @param key   - Key to update.
-   * @param value - Value to update.
-   */
-  void write(uint64_t key, std::string value);
+  protected:
+    /**
+     * Read operation for a specific key.
+     * @param key - Key to read from.
+     * @return    - Value that corresponds to this specific key.
+     */
+    std::string read(uint64_t key);
 
-  /**
-   * Commit transaction.
-   * @return  - Whether or not the commit succeeded.
-   */
-  bool commit();
+    /**
+     * Write operation that updates the value of a key.
+     * @param key   - Key to update.
+     * @param value - Value to update.
+     */
+    void write(uint64_t key, std::string value);
 
-public:
-  /**
-   * Run this transaction.
-   * @return  - Whether or not the transaction was successful.
-   */
-  virtual bool run() = 0;
+    /**
+     * Commit transaction.
+     * @return  - Whether or not the transaction committed or aborted.
+     */
+    bool commit();
+
+  public:
+    /**
+     * Run this transaction.
+     * @return  - Whether or not the transaction committed or aborted.
+     */
+    virtual bool run() = 0;
 };
 
 #endif /* COORDINATOR_H_ */

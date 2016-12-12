@@ -1,4 +1,4 @@
-/**
+/*
  * SafeQueue.cc
  *
  *  Created on: Jul 18, 2016
