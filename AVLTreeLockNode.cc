@@ -11,10 +11,6 @@
 #include <vector>
 
 #include "AVLTreeLockNode.h"
-#include "GRPCServer.h"
-#include "SimpleKeyMapper.h"
-#include "SimpleTServer.h"
-#include "TServer.h"
 
 AVLTreeLockNode::AVLTreeLockNode() {
   _status = FREE;

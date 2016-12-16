@@ -30,6 +30,11 @@ class RPCTest : public Test {
      */
     RPCTest(RPCClient *rpc_client, RPCServer *rpc_server, int port);
 
+  private:
+    static void runClient(RPCClient *rpc_client, int port);
+    static void runServer(RPCServer *rpc_server);
+
+  public:
     void run() override;
 };
 

@@ -1,5 +1,5 @@
 /*
- * MinimumResolutionClient.cc
+ * DummyResolutionClient.cc
  *
  *  Created on: Jun 13, 2016
  *      Author: theo
@@ -7,18 +7,21 @@
 
 #include <cassert>
 #include <set>
-#include "MinimumResolutionClient.h"
 
-MinimumResolutionClient::MinimumResolutionClient(RPCClient *rpc_client)
-    : ResolutionClient(rpc_client), _tag(0) { }
+#include "DummyResolutionClient.h"
 
-MinimumResolutionClient::~MinimumResolutionClient() {
+DummyResolutionClient::DummyResolutionClient(RPCClient *rpc_client)
+  : ResolutionClient(rpc_client) {
+  _tag = 0;
+}
+
+DummyResolutionClient::~DummyResolutionClient() {
   _node_to_address.clear();
 }
 
-void MinimumResolutionClient::findAddresses(const std::set<uint64_t> &nodes, std::set<std::string> &addresses) {
+void DummyResolutionClient::findAddresses(const std::set<uint64_t> &nodes, std::set<std::string> &addresses) {
   std::unique_lock<std::mutex> lock(_mutex1);
-  // TODO: Change code here when master is implemented.
+
   for (std::set<uint64_t>::iterator it = nodes.begin(); it != nodes.end(); ++it) {
     if (_node_to_address.find(*it) == _node_to_address.end())
       _node_to_address[*it] = "localhost:10001";
@@ -26,14 +29,14 @@ void MinimumResolutionClient::findAddresses(const std::set<uint64_t> &nodes, std
   }
 }
 
-void MinimumResolutionClient::invalidateAddresses(const std::set<uint64_t> &nodes) {
+void DummyResolutionClient::invalidateAddresses(const std::set<uint64_t> &nodes) {
   std::unique_lock<std::mutex> lock(_mutex1);
 
   for (std::set<uint64_t>::iterator it = nodes.begin(); it != nodes.end(); ++it)
     _node_to_address.erase(*it);
 }
 
-void MinimumResolutionClient::request(std::set<uint64_t> nodes, request_t request, void *args) {
+void DummyResolutionClient::request(std::set<uint64_t> nodes, request_t request, void *args) {
   std::string server_address;
 
   switch (request) {
@@ -88,7 +91,6 @@ void MinimumResolutionClient::request(std::set<uint64_t> nodes, request_t reques
       while (rem_nodes.size() != 0) {
         // Step One: Gather all the addresses of the remaining nodes.
         findAddresses(rem_nodes, addresses);
-        // std::cout << "Addresses size: " << addresses.size() << std::endl;
 
         // Step Two: Send messages to all the addresses.
         _mutex2.lock();
@@ -102,7 +104,6 @@ void MinimumResolutionClient::request(std::set<uint64_t> nodes, request_t reques
           _rpc_client->asyncRPC(*it, _tag++, P1C, &address_to_reply[*it]);
         }
         _mutex2.unlock();
-        // std::cout << "Send all messages." << std::endl;
 
         // Step Three: Collect all the replies.
         for (std::set<std::string>::iterator it1 = addresses.begin(); it1 != addresses.end(); ++it1) {
@@ -110,13 +111,11 @@ void MinimumResolutionClient::request(std::set<uint64_t> nodes, request_t reques
 
           _rpc_client->waitAsyncReply(tag++);
           updated_nodes = address_to_reply[*it1].nodes;
-          // std::cout << "Reply Nodes Size: " << updated_nodes.size() << std::endl;
           for (std::set<uint64_t>::iterator it2 = updated_nodes->begin(); it2 != updated_nodes->end(); ++it2)
             rem_nodes.erase(*it2);
           delete updated_nodes;
           rsl_p1c_args->vote = rsl_p1c_args->vote && address_to_reply[*it1].vote;
         }
-        // std::cout << "Reply all messages." << std::endl;
 
         // Step Four: Delete from cache all the remaining nodes (wrong addresses).
         invalidateAddresses(rem_nodes);
@@ -134,7 +133,6 @@ void MinimumResolutionClient::request(std::set<uint64_t> nodes, request_t reques
       while (rem_nodes.size() != 0) {
         // Step One: Gather all the addresses of the remaining nodes.
         findAddresses(rem_nodes, addresses);
-        // std::cout << "Addresses size: " << addresses.size() << std::endl;
 
         // Step Two: Send messages to all the addresses.
         _mutex2.lock();
@@ -148,7 +146,6 @@ void MinimumResolutionClient::request(std::set<uint64_t> nodes, request_t reques
           _rpc_client->asyncRPC(*it, _tag++, P2C, &address_to_reply[*it]);
         }
         _mutex2.unlock();
-        // std::cout << "Send all messages." << std::endl;
 
         // Step Three: Collect all the replies.
         for (std::set<std::string>::iterator it = addresses.begin(); it != addresses.end(); ++it) {
@@ -156,12 +153,10 @@ void MinimumResolutionClient::request(std::set<uint64_t> nodes, request_t reques
 
           _rpc_client->waitAsyncReply(tag++);
           updated_nodes = address_to_reply[*it].nodes;
-          // std::cout << "Reply Nodes Size: " << updated_nodes.size() << std::endl;
           for (std::set<uint64_t>::iterator it2 = updated_nodes->begin(); it2 != updated_nodes->end(); ++it2)
             rem_nodes.erase(*it2);
           delete updated_nodes;
         }
-        // std::cout << "Reply all messages." << std::endl;
 
         // Step Four: Delete from cache all the remaining nodes (wrong addresses).
         invalidateAddresses(rem_nodes);

@@ -8,6 +8,7 @@
 #include <cassert>
 #include <iostream>
 
+#include "AVLTreeLockManager.h"
 #include "LockManager.h"
 #include "LockManagerTest.h"
 #include "TestEvent.h"
@@ -64,4 +65,13 @@ void LockManagerTest::run() {
   _lock_manager->freeze(8);
 
   std::cout << "Lock Manager Test Successful." << std::endl;
+}
+
+int main(int argc, char **argv) {
+  AVLTreeLockManager lock_manager;
+  LockManagerTest lock_manager_test(&lock_manager);
+
+  lock_manager_test.run();
+
+  return 0;
 }

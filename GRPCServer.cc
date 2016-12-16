@@ -230,9 +230,9 @@ GRPCServer::GRPCServer(int port)
 }
 
 GRPCServer::~GRPCServer() {
-  _server->Shutdown();
   _request_queue->Shutdown();
   _reply_queue->Shutdown();
+  _server->Shutdown();
 }
 
 void GRPCServer::nextRequest(uint64_t *rid, request_t *request, void **args) {
@@ -313,81 +313,3 @@ void GRPCServer::prepareNextRequest(request_t request) {
       break;
   }
 }
-
-/*
-static void *HandleRpcs(void *args) {
-  thread_args_t *thread_args = (thread_args_t *) args;
-  GRPCServer *grpc_server = thread_args->grpc_server;
-
-  free(thread_args);
-  while (true) {
-    uint64_t rid1 = 0;
-    uint64_t rid2 = 0;
-    request_t request;
-    void *args;
-
-    while ((!grpc_server->asyncNextRequest(&rid1, &request, &args)) && (!grpc_server->asyncNextCompletedReply(&rid2)));
-    if (rid1 != 0) {
-      assert (rid2 == 0);
-      switch (request) {
-        case READ: {
-          rpc_read_args_t *rpc_read_args = (rpc_read_args_t *) args;
-
-          rpc_read_args->value = "100";
-          rpc_read_args->status = true;
-          break;
-        }
-        case WRITE: {
-          rpc_write_args_t *rpc_write_args = (rpc_write_args_t *) args;
-
-          rpc_write_args->status = true;
-          break;
-        }
-        case P1C: {
-          rpc_p1c_args_t *rpc_p1c_args = (rpc_p1c_args_t *) args;
-
-          rpc_p1c_args->nodes->insert(0);
-          rpc_p1c_args->vote = true;
-          break;
-        }
-        case P2C: {
-          rpc_p2c_args_t *rpc_p2c_args = (rpc_p2c_args_t *) args;
-
-          rpc_p2c_args->nodes->insert(0);
-          break;
-        }
-      }
-      grpc_server->sendReply(rid1);
-    } else {
-      assert (rid1 == 0);
-      grpc_server->deleteRequest(rid2);
-    }
-  }
-}
-
-int main(int argc, char **argv) {
-  if (argc != 3) {
-    std::cerr << "Usage: " << argv[0] << " <port_num> <nr_threads>" << std::endl;
-    exit(1);
-  }
-
-  GRPCServer grpc_server(atoi(argv[1]));
-  int nr_threads = atoi(argv[2]);
-  pthread_t threads[nr_threads];
-
-  for (int i = 0; i < nr_threads; i++) {
-    thread_args_t *thread_args = (thread_args_t *) malloc(sizeof(thread_args_t));
-
-    thread_args->id = i;
-    thread_args->grpc_server = &grpc_server;
-    if (pthread_create(&threads[i], NULL, HandleRpcs, thread_args)) {
-       std::cout << "Error:unable to create thread" << std::endl;
-       free(thread_args);
-       exit(1);
-    }
-  }
-
-  for (int i = 0; i < nr_threads; i++)
-    pthread_join(threads[i], NULL);
-}
-*/

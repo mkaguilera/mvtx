@@ -8,17 +8,21 @@ GRPC_CPP_PLUGIN = grpc_cpp_plugin
 GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
 PROTOS_PATH = ./protos
 OBJS=MvtkvsService.grpc.pb.cc MvtkvsService.pb.cc Coordinator Server
-COORD_SOURCES=GRPCClient.o MinimumResolutionClient.o Coordinator.o SimpleKeyMapper.o SimpleTransactionIDGenerator.o \
+COORD_SOURCES=GRPCClient.o DummyResolutionClient.o Coordinator.o SimpleKeyMapper.o SimpleTransactionIDGenerator.o \
               SimpleTimestampGenerator.o WithdrawCoordinator.o MvtkvsService.pb.o MvtkvsService.grpc.pb.o \
               SafeQueue.o WithdrawCoordinatorMain.o
 SERVER_SOURCES=ServerMain.o ServerEvent.o SimpleTServer.o SimpleKeyMapper.o SafeQueue.o GRPCServer.o \
                MvtkvsService.pb.o MvtkvsService.grpc.pb.o
+TESTS=LockManagerTest MvtkvsService.grpc.pb.cc MvtkvsService.pb.cc RPCTest
 
 vpath %.proto $(PROTOS_PATH)
 
-all: Doxygen $(OBJS) test
+all: Doxygen $(OBJS)
 
-test: RunTests
+tests: $(TESTS)
+
+Doxygen : mvtx.doxyfile *.h *.cc
+	doxygen mvtx.doxyfile
 
 %.grpc.pb.cc: %.proto
 	$(PROTOC) -I $(PROTOS_PATH) --grpc_out=. --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
@@ -28,8 +32,7 @@ test: RunTests
 
 GRPCClient.o : RPCClient.h GRPCClient.h GRPCClient.cc MvtkvsService.grpc.pb.h MvtkvsService.pb.h Request.h
 
-MinimumResolutionClient.o : ResolutionClient.h MinimumResolutionClient.h MinimumResolutionClient.cc RPCClient.h \
-                            Request.h
+DummyResolutionClient.o : ResolutionClient.h DummyResolutionClient.h DummyResolutionClient.cc RPCClient.h Request.h \
 
 Coordinator.o : Coordinator.h Coordinator.cc KeyMapper.h TransactionIDGenerator.h TimestampGenerator.h \
                 ResolutionClient.h RPCClient.h Request.h
@@ -67,17 +70,13 @@ TestEvent.o : Event.h TestEvent.h TestEvent.cc
 
 LockManagerTest.o : Test.h LockManagerTest.h LockManagerTest.cc
 
+LockManagerTest : AVLTreeLockManager.o AVLTreeLockNode.o LockManagerTest.o TestEvent.o
+	$(CXX) $^ $(LDFLAGS) -o $@
+	
 RPCTest.o : Test.h RPCTest.h RPCTest.cc
 
-RunTests.o : LockManager.h RPCClient.h RPCServer.h RunTests.cc
-
-RunTests : AVLTreeLockManager.o AVLTreeLockNode.o TestEvent.o ServerEvent.o SimpleTServer.o \
-           SimpleKeyMapper.o SafeQueue.o GRPCServer.o MvtkvsService.pb.o MvtkvsService.grpc.pb.o LockManagerTest.o \
-           RunTests.o GRPCClient.o RPCTest.o
+RPCTest : GRPCServer.o GRPCClient.o RPCTest.o MvtkvsService.pb.o MvtkvsService.grpc.pb.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-Doxygen : mvtx.doxyfile *.h *.cc
-	doxygen mvtx.doxyfile
-
 clean:
-	$(RM) -r -f *.o *.pb.cc *.pb.h $(OBJS) RunTests html latex
+	$(RM) -r -f html latex *.o *.pb.cc *.pb.h $(OBJS) $(TESTS)
