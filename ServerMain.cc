@@ -1,4 +1,4 @@
-/**
+/*
  * ServerMain.cc
  *
  *  Created on: Jul 11, 2016

@@ -1,4 +1,4 @@
-/**
+/*
  * WithdrawCoordinator.h
  *
  *  Created on: Jun 15, 2016
