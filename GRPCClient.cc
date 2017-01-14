@@ -247,12 +247,9 @@ bool GRPCClient::syncRPC(const std::string &addr, request_t request, void *args)
       status = _address_to_stub[addr]->P1C(&ctx, request, &reply);
       _mutex1.unlock();
       if (status.ok()) {
-        std::cout << "Eftasa EDW " << reply.node_size()<< std::endl;
         for (int i = 0; i < reply.node_size(); i++)
           rpc_p1c_args->nodes->insert(reply.node(i));
-        std::cout << "Eftasa EDW" << std::endl;
         rpc_p1c_args->vote = reply.vote();
-        std::cout << "Eftasa EDW" << std::endl;
       }
       break;
     }

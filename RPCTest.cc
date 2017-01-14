@@ -24,7 +24,6 @@ void RPCTest::runClient(RPCClient *rpc_client, int port) {
   rpc_p1c_args_t *p1c_args;
   rpc_p2c_args_t *p2c_args;
 
-  // Check synchronous-asynchronous communication.
   read_args = (rpc_read_args_t *) malloc(sizeof(rpc_read_args_t));
   read_args->read_args = (read_args_t *) malloc(sizeof(read_args_t));
   read_args->read_args->tid = 0;
@@ -39,8 +38,6 @@ void RPCTest::runClient(RPCClient *rpc_client, int port) {
   free(read_args->read_args);
   free(read_args);
 
-  std::cout << "Finished Client 1." << std::endl;
-
   write_args = (rpc_write_args_t *) malloc(sizeof(rpc_write_args_t));
   write_args->write_args = (write_args_t *) malloc(sizeof(write_args_t));
   write_args->write_args->tid = 1;
@@ -51,29 +48,22 @@ void RPCTest::runClient(RPCClient *rpc_client, int port) {
   free(write_args->write_args);
   free(write_args);
 
-  std::cout << "Finished Client 2." << std::endl;
-
   p1c_args = (rpc_p1c_args_t *) malloc(sizeof(rpc_p1c_args_t));
   p1c_args->p1c_args = (p1c_args_t *) malloc(sizeof(p1c_args_t));
   p1c_args->p1c_args->tid = 2;
   p1c_args->p1c_args->start_ts = 2;
   p1c_args->p1c_args->commit_ts = 2;
-  std::cout << "Eftasa edw" << std::endl;
   p1c_args->p1c_args->read_nodes = new std::set<uint64_t>();
   p1c_args->p1c_args->read_nodes->insert(0);
   p1c_args->p1c_args->write_nodes = new std::set<uint64_t>();
   p1c_args->p1c_args->write_nodes->insert(1);
   p1c_args->nodes = new std::set<uint64_t> ();
-  std::cout << "Eftasa edw" << std::endl;
   rpc_client->syncRPC("localhost:" + std::to_string(port), P1C, p1c_args);
-  std::cout << "Eftasa edw" << std::endl;
   assert(p1c_args->nodes->size() == 1);
   assert(*(p1c_args->nodes->begin()) == 2);
   assert(p1c_args->vote);
   free(p1c_args->p1c_args);
   free(p1c_args);
-
-  std::cout << "Finished Client 3." << std::endl;
 
   p2c_args = (rpc_p2c_args_t *) malloc(sizeof(rpc_p2c_args_t));
   p2c_args->p2c_args = (p2c_args_t *) malloc(sizeof(p2c_args_t));
@@ -85,8 +75,6 @@ void RPCTest::runClient(RPCClient *rpc_client, int port) {
   assert(*(p2c_args->nodes->begin()) == 3);
   free(p2c_args->p2c_args);
   free(p2c_args);
-
-  std::cout << "Finished Client 4." << std::endl;
 }
 
 void RPCTest::runServer(RPCServer *rpc_server) {
@@ -100,13 +88,9 @@ void RPCTest::runServer(RPCServer *rpc_server) {
   void *args;
   std::set<uint64_t> *nodes = new std::set<uint64_t> ();
 
-  // Check synchronous-synchronous communication.
   while (!rpc_server->asyncNextRequest(&rid1, &request, &args));
   assert(request == READ);
   read_args = (rpc_read_args_t *) args;
-  std::cout << "Tid: " << read_args->read_args->tid << std::endl;
-  std::cout << read_args->read_args->key << std::endl;
-  std::cout << read_args->read_args->start_ts << std::endl;
   assert(read_args->read_args->tid == 0);
   assert(read_args->read_args->key == 0);
   assert(read_args->read_args->start_ts == 0);
@@ -117,10 +101,7 @@ void RPCTest::runServer(RPCServer *rpc_server) {
   assert(rid1 == rid2);
   rpc_server->deleteRequest(rid2);
 
-  std::cout << "Finished Server 1." << std::endl;
-
   while (!rpc_server->asyncNextRequest(&rid1, &request, &args));
-  std::cout << "Request: " << request << std::endl;
   assert(request == WRITE);
   write_args = (rpc_write_args_t *) args;
   assert(write_args->write_args->tid == 1);
@@ -131,8 +112,6 @@ void RPCTest::runServer(RPCServer *rpc_server) {
   while (!rpc_server->asyncNextCompletedReply(&rid2));
   assert(rid1 == rid2);
   rpc_server->deleteRequest(rid2);
-
-  std::cout << "Finished Server 2." << std::endl;
 
   while (!rpc_server->asyncNextRequest(&rid1, &request, &args));
   assert(request == P1C);
@@ -154,8 +133,6 @@ void RPCTest::runServer(RPCServer *rpc_server) {
   rpc_server->deleteRequest(rid2);
   nodes->clear();
 
-  std::cout << "Finished Server 3." << std::endl;
-
   while (!rpc_server->asyncNextRequest(&rid1, &request, &args));
   assert(request == P2C);
   p2c_args = (rpc_p2c_args_t *) args;
@@ -169,8 +146,6 @@ void RPCTest::runServer(RPCServer *rpc_server) {
   p2c_args->nodes->clear();
   rpc_server->deleteRequest(rid2);
   nodes->clear();
-
-  std::cout << "Finished Server 4." << std::endl;
 }
 
 void RPCTest::run() {
