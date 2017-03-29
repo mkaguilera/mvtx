@@ -153,8 +153,8 @@ void RPCTest::run() {
   std::thread client_thread(runClient, _rpc_client, _port);
 
   client_thread.join();
-  delete _rpc_client;
   server_thread.join();
+  delete _rpc_client;
   delete _rpc_server;
 }
 

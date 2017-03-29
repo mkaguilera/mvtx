@@ -21,5 +21,5 @@ int main(int argc, char **argv) {
   RPCTest rpc_test(&grpcClient, &grpcServer, 10000);
 
   lock_manager_test.run();
-  // rpc_test.run();
+  rpc_test.run();
 }
