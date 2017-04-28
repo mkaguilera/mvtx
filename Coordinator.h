@@ -62,7 +62,7 @@ class Coordinator
      * @param key - Key to read from.
      * @return    - Value that corresponds to this specific key.
      */
-    std::string read(uint64_t key);
+    std::string *read(uint64_t key);
 
     /**
      * Write operation that updates the value of a key.

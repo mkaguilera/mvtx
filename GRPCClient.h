@@ -60,8 +60,6 @@ class GRPCClient: public RPCClient
         CompletionQueue _cq;
         ///> Whether or not gRPC is successful.
         Status _status;
-        ///> Status of the request.
-        RequestStatus _rstatus;
 
       public:
         /**
@@ -94,11 +92,11 @@ class GRPCClient: public RPCClient
     class ReadRequestHandler: public RequestHandler
     {
       private:
-        ///< Read gRPC arguments.
+        ///> Read gRPC arguments.
         rpc_read_args_t *_rpc_read_args;
-        ///< Reader of gRPC reply for the specific request.
+        ///> Reader of gRPC reply for the specific request.
         std::unique_ptr<ClientAsyncResponseReader<ReadReply>> _reply_reader;
-        ///< Structure to hold the reply.
+        ///> Structure to hold the reply.
         ReadReply _reply;
 
       public:

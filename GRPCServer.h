@@ -40,7 +40,7 @@ class GRPCServer: public RPCServer
      */
     class RequestHandler
     {
-      protected:
+      public:
         /**
          * Request status for the server side. CREATE means that it is waiting for a request. PROCESS means that it has
          * processed a request but has not yet sent the reply, and FINISH means that the reply has been sent and
@@ -51,26 +51,18 @@ class GRPCServer: public RPCServer
           CREATE, PROCESS, FINISH
         };
 
-        ///> Service from GRPC server.
-        Mvtkvs::AsyncService *_service;
-        ///> Queue that stores pending requests.
-        ServerCompletionQueue *_request_queue;
-        ///> Queue that stores pending replies.
-        ServerCompletionQueue *_reply_queue;
-        ///> Server context for GRPC server.
-        ServerContext _ctx;
+      protected:
         ///> Status of the request.
         RequestStatus _status;
+
+        ///> Server context for GRPC server.
+        ServerContext _ctx;
 
       public:
         /**
          * Constructor of RequestHandler.
-         * @param service       - Service (RPCs) that is going to be provided to the clients.
-         * @param request_queue - Queue that holds all incoming requests that have not been processed yet.
-         * @param reply_queue   - Queue that holds all outgoing replies that have not been processed yet.
          */
-        RequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *request_queue,
-            ServerCompletionQueue *reply_queue);
+        RequestHandler();
 
         /**
          * Destructor of RequestHandler. It erases all the queues and their content.
@@ -93,6 +85,12 @@ class GRPCServer: public RPCServer
          * @return  - The arguments of the request.
          */
         virtual void *getArgs() = 0;
+
+        /**
+         * Get the status of this request.
+         * @return  - The status of the request.
+         */
+        RequestStatus getStatus();
     };
 
     /**
@@ -101,18 +99,18 @@ class GRPCServer: public RPCServer
     class ReadRequestHandler: private RequestHandler
     {
       private:
-        ReadRequest _request;
-        ServerAsyncResponseWriter<ReadReply> _responder;
-        rpc_read_args_t _rpc_read_args;
+        ReadRequest _request;                             ///> Read request for GRPC.
+        ServerAsyncResponseWriter<ReadReply> _responder;  ///> Responder for read reply.
+        rpc_read_args_t _rpc_read_args;                   ///> Read RPC arguments.
       public:
         /**
          * Constructor of ReadRequestHandler.
-         * @param service       - Service (RPCs) that is going to be provided to the clients.
-         * @param request_queue - Queue that holds all incoming requests that have not been processed yet.
-         * @param reply_queue   - Queue that holds all outgoing replies that have not been processed yet.
+         * @param service - Service (RPCs) that is going to be provided to the clients.
+         * @param queue   - Queue that holds all incoming requests and all outgoing replies that have not been
+         *                  processed yet.
+         * @param ctx     - Server context for GRPC server.
          */
-        ReadRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *request_queue,
-            ServerCompletionQueue *reply_queue);
+        ReadRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *queue);
         /**
          * Destructor of ReadRequestHandler.
          */
@@ -129,18 +127,18 @@ class GRPCServer: public RPCServer
     class WriteRequestHandler: private RequestHandler
     {
       private:
-        WriteRequest _request;
-        ServerAsyncResponseWriter<WriteReply> _responder;
-        rpc_write_args_t _rpc_write_args;
+        WriteRequest _request;                            ///> Write request for GRPC.
+        ServerAsyncResponseWriter<WriteReply> _responder; ///> Responder for write reply.
+        rpc_write_args_t _rpc_write_args;                 ///> Write RPC arguments.
       public:
         /**
          * Constructor of WriteRequestHandler.
-         * @param service       - Service (RPCs) that is going to be provided to the clients.
-         * @param request_queue - Queue that holds all incoming requests that have not been processed yet.
-         * @param reply_queue   - Queue that holds all outgoing replies that have not been processed yet.
+         * @param service - Service (RPCs) that is going to be provided to the clients.
+         * @param queue   - Queue that holds all incoming requests and all outgoing replies that have not been
+         *                  processed yet.
+         * @param ctx     - Server context for GRPC server.
          */
-        WriteRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *request_queue,
-            ServerCompletionQueue *reply_queue);
+        WriteRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *queue);
         /**
          * Destructor of WriteRequestHandler.
          */
@@ -157,18 +155,18 @@ class GRPCServer: public RPCServer
     class PhaseOneCommitRequestHandler: private RequestHandler
     {
       private:
-        PhaseOneCommitRequest _request;
-        ServerAsyncResponseWriter<PhaseOneCommitReply> _responder;
-        rpc_p1c_args_t _rpc_p1c_args;
+        PhaseOneCommitRequest _request;                             ///> Phase one commit request for GRPC.
+        ServerAsyncResponseWriter<PhaseOneCommitReply> _responder;  ///> Responder for phase one commit reply.
+        rpc_p1c_args_t _rpc_p1c_args;                               ///> Phase one commit RPC arguments.
       public:
         /**
          * Constructor of PhaseOneCommitRequestHandler.
-         * @param service       - Service (RPCs) that is going to be provided to the clients.
-         * @param request_queue - Queue that holds all incoming requests that have not been processed yet.
-         * @param reply_queue   - Queue that holds all outgoing replies that have not been processed yet.
+         * @param service - Service (RPCs) that is going to be provided to the clients.
+         * @param queue   - Queue that holds all incoming requests and all outgoing replies that have not been
+         *                  processed yet.
+         * @param ctx     - Server context for GRPC server.
          */
-        PhaseOneCommitRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *request_queue,
-            ServerCompletionQueue *reply_queue);
+        PhaseOneCommitRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *queue);
         /**
          * Destructor of PhaseOneCommitRequestHandler.
          */
@@ -185,18 +183,18 @@ class GRPCServer: public RPCServer
     class PhaseTwoCommitRequestHandler: private RequestHandler
     {
       private:
-        PhaseTwoCommitRequest _request;                             ///< Phase two commit request for GRPC.
-        ServerAsyncResponseWriter<PhaseTwoCommitReply> _responder;  ///< Responder for phase one commit reply.
-        rpc_p2c_args_t _rpc_p2c_args;                               ///< Phase two commit RPC arguments.
+        PhaseTwoCommitRequest _request;                             ///> Phase two commit request for GRPC.
+        ServerAsyncResponseWriter<PhaseTwoCommitReply> _responder;  ///> Responder for phase two commit reply.
+        rpc_p2c_args_t _rpc_p2c_args;                               ///> Phase two commit RPC arguments.
       public:
         /**
          * Constructor of PhaseTwoCommitRequestHandler.
-         * @param service       - Service (RPCs) that is going to be provided to the clients.
-         * @param request_queue - Queue that holds all incoming requests that have not been processed yet.
-         * @param reply_queue   - Queue that holds all outgoing replies that have not been processed yet.
+         * @param service - Service (RPCs) that is going to be provided to the clients.
+         * @param queue   - Queue that holds all incoming requests and all outgoing replies that have not been
+         *                  processed yet.
+         * @param ctx     - Server context for GRPC server.
          */
-        PhaseTwoCommitRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *request_queue,
-            ServerCompletionQueue *reply_queue);
+        PhaseTwoCommitRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *queue);
         /**
          * Destructor of PhaseTwoCommitRequestHandler.
          */
@@ -208,14 +206,16 @@ class GRPCServer: public RPCServer
     };
 
   private:
-    ///> Queue that maintains all the incoming requests.
-    std::unique_ptr<ServerCompletionQueue> _request_queue;
-    ///> Queue that maintains all the pending replies.
-    std::unique_ptr<ServerCompletionQueue> _reply_queue;
     ///> GRPC server object.
     std::unique_ptr<Server> _server;
-    ///< GRPC service object needed for receiving requests and sending replies.
+    ///> Service from GRPC server.
     Mvtkvs::AsyncService _service;
+    ///> Queue that stores pending requests and replies.
+    std::unique_ptr<ServerCompletionQueue> _queue;
+    ///> Request queue that stores requests handlers in the PROCESS state.
+    std::vector<RequestHandler *> *_request_queue;
+    ///> Reply queue that stores requests handlers in the FINISH state.
+    std::vector<RequestHandler *> *_reply_queue;
 
   public:
     /**
@@ -229,19 +229,32 @@ class GRPCServer: public RPCServer
      */
     ~GRPCServer();
 
+  private:
+    /**
+     * Process gRPC queue and put messages to request or reply queue as handlers (synchronous).
+     * @param request - Type of the request.
+     */
+    void processSyncQueue();
+
+    /**
+     * Process gRPC queue and put messages to request or reply queue as handlers (asynchronous).
+     * @param request - Type of the request.
+     */
+    void processAsyncQueue();
+
+    /**
+     * Prepares next handler for incoming requests.
+     * @param request - Type of the request.
+     */
+    void prepareNextRequest(request_t request);
+
+  public:
     void nextRequest(uint64_t *rid, request_t *request, void **args) override;
     bool asyncNextRequest(uint64_t *rid, request_t *request, void **args) override;
     void sendReply(uint64_t rid) override;
     void nextCompletedReply(uint64_t *rid) override;
     bool asyncNextCompletedReply(uint64_t *rid) override;
     void deleteRequest(uint64_t rid) override;
-
-  private:
-    /**
-     * Prepares next handler for incoming requests.
-     * @param request - Type of the request.
-     */
-    void prepareNextRequest(request_t request);
 };
 
 #endif /* GRPCSERVER_H_ */

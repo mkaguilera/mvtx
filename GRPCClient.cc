@@ -6,12 +6,11 @@
  */
 
 #include <cassert>
+#include <unistd.h>
 #include "GRPCClient.h"
 
 GRPCClient::RequestHandler::RequestHandler(GRPCClient *grpc_client, const std::string &addr)
-    : _grpc_client(grpc_client), _addr(addr) {
-  _rstatus = INIT;
-}
+    : _grpc_client(grpc_client), _addr(addr) {}
 
 GRPCClient::RequestHandler::~RequestHandler() {
   _cq.Shutdown();
@@ -24,33 +23,23 @@ Status GRPCClient::RequestHandler::getStatus() {
 GRPCClient::ReadRequestHandler::ReadRequestHandler(GRPCClient *grpc_client, const std::string &addr,
                                                    rpc_read_args_t *rpc_read_args)
     : GRPCClient::RequestHandler::RequestHandler(grpc_client, addr), _rpc_read_args(rpc_read_args),
-      _reply_reader(_grpc_client->getStub(_addr)->
+      _reply_reader(_grpc_client->getStub(addr)->
           AsyncRead(&_ctx, GRPCClient::makeReadRequest(_rpc_read_args->read_args), &_cq)) {
+  _reply_reader->Finish(&_reply, &_status, (void *) this);
 }
 
 GRPCClient::ReadRequestHandler::~ReadRequestHandler() {}
 
 void GRPCClient::ReadRequestHandler::proceed() {
-  switch (_rstatus) {
-    case INIT:
-    {
-      _rstatus = WAIT;
-      _reply_reader->Finish(&_reply, &_status, (void *) 1);
-      break;
-    }
-    case WAIT:
-    {
-      void *tag;
-      bool ok;
+  void *tag;
+  bool ok;
 
-      _cq.Next(&tag, &ok);
-      if (ok) {
-        _rpc_read_args->status = _reply.status();
-        if (_rpc_read_args->status)
-          _rpc_read_args->value = _reply.value();
-      }
-      break;
-    }
+  _cq.Next(&tag, &ok);
+  assert(tag == (void *) this);
+  if (ok) {
+    _rpc_read_args->status = _reply.status();
+    if (_rpc_read_args->status)
+      _rpc_read_args->value = new std::string(_reply.value());
   }
 }
 
@@ -59,29 +48,20 @@ GRPCClient::WriteRequestHandler::WriteRequestHandler(GRPCClient *grpc_client, co
     : GRPCClient::RequestHandler::RequestHandler(grpc_client, addr), _rpc_write_args(rpc_write_args),
       _reply_reader(_grpc_client->getStub(_addr)->
           AsyncWrite(&_ctx, GRPCClient::makeWriteRequest(_rpc_write_args->write_args), &_cq)) {
+  _reply_reader->Finish(&_reply, &_status, (void *) this);
 }
 
 GRPCClient::WriteRequestHandler::~WriteRequestHandler() {}
 
 void GRPCClient::WriteRequestHandler::proceed() {
-  switch (_rstatus) {
-    case INIT:
-    {
-      _rstatus = WAIT;
-      _reply_reader->Finish(&_reply, &_status, (void *) 1);
-      break;
-    }
-    case WAIT:
-    {
-      void *tag;
-      bool ok;
+  void *tag;
+  bool ok;
 
-      _cq.Next(&tag, &ok);
-      if (ok)
-        _rpc_write_args->status = _reply.status();
-      break;
-    }
-  }
+  _cq.Next(&tag, &ok);
+  assert(tag == (void *) this);
+  if (ok)
+    _rpc_write_args->status = _reply.status();
+
 }
 
 GRPCClient::PhaseOneCommitRequestHandler::PhaseOneCommitRequestHandler(GRPCClient *grpc_client, const std::string &addr,
@@ -89,31 +69,21 @@ GRPCClient::PhaseOneCommitRequestHandler::PhaseOneCommitRequestHandler(GRPCClien
     : GRPCClient::RequestHandler::RequestHandler(grpc_client, addr), _rpc_p1c_args(rpc_p1c_args),
       _reply_reader(_grpc_client->getStub(_addr)->
           AsyncP1C(&_ctx, GRPCClient::makePhaseOneCommitRequest(_rpc_p1c_args->p1c_args), &_cq)) {
+  _reply_reader->Finish(&_reply, &_status, (void *) this);
 }
 
 GRPCClient::PhaseOneCommitRequestHandler::~PhaseOneCommitRequestHandler() {}
 
 void GRPCClient::PhaseOneCommitRequestHandler::proceed() {
-  switch (_rstatus) {
-    case INIT:
-    {
-      _rstatus = WAIT;
-      _reply_reader->Finish(&_reply, &_status, (void *) 1);
-      break;
-    }
-    case WAIT:
-    {
-      void *tag;
-      bool ok;
+  void *tag;
+  bool ok;
 
-      _cq.Next(&tag, &ok);
-      if (ok) {
-        for (int i = 0; i < _reply.node_size(); i++)
-          _rpc_p1c_args->nodes->insert(_reply.node(i));
-        _rpc_p1c_args->vote = _reply.vote();
-      }
-      break;
-    }
+  _cq.Next(&tag, &ok);
+  assert(tag == (void *) this);
+  if (ok) {
+    for (int i = 0; i < _reply.node_size(); i++)
+      _rpc_p1c_args->nodes->insert(_reply.node(i));
+    _rpc_p1c_args->vote = _reply.vote();
   }
 }
 
@@ -122,30 +92,20 @@ GRPCClient::PhaseTwoCommitRequestHandler::PhaseTwoCommitRequestHandler(GRPCClien
     : GRPCClient::RequestHandler::RequestHandler(grpc_client, addr), _rpc_p2c_args(rpc_p2c_args),
       _reply_reader(_grpc_client->getStub(_addr)->
           AsyncP2C(&_ctx, GRPCClient::makePhaseTwoCommitRequest(_rpc_p2c_args->p2c_args), &_cq)) {
+  _reply_reader->Finish(&_reply, &_status, (void *) this);
 }
 
 GRPCClient::PhaseTwoCommitRequestHandler::~PhaseTwoCommitRequestHandler() {}
 
 void GRPCClient::PhaseTwoCommitRequestHandler::proceed() {
-  switch (_rstatus) {
-    case INIT:
-    {
-      _rstatus = WAIT;
-      _reply_reader->Finish(&_reply, &_status, (void *) 1);
-      break;
-    }
-    case WAIT:
-    {
-      void *tag;
-      bool ok;
+  void *tag;
+  bool ok;
 
-      _cq.Next(&tag, &ok);
-      if (ok)
-        for (int i = 0; i < _reply.node_size(); i++)
-          _rpc_p2c_args->nodes->insert(_reply.node(i));
-      break;
-    }
-  }
+  _cq.Next(&tag, &ok);
+  assert(tag == (void *) this);
+  if (ok)
+    for (int i = 0; i < _reply.node_size(); i++)
+      _rpc_p2c_args->nodes->insert(_reply.node(i));
 }
 
 GRPCClient::~GRPCClient () {
@@ -222,7 +182,7 @@ bool GRPCClient::syncRPC(const std::string &addr, request_t request, void *args)
       _mutex1.unlock();
       rpc_read_args->status = status.ok() && reply.status();
       if (rpc_read_args->status)
-        rpc_read_args->value = reply.value();
+        rpc_read_args->value->assign(reply.value());
       break;
     }
     case (WRITE):
@@ -276,6 +236,7 @@ bool GRPCClient::syncRPC(const std::string &addr, request_t request, void *args)
 void GRPCClient::asyncRPC(const std::string &addr, uint64_t tag, request_t request, void *args) {
   GRPCClient::RequestHandler *handler = NULL;
 
+  makeStub(addr);
   switch(request) {
     case (READ):
     {
@@ -298,7 +259,6 @@ void GRPCClient::asyncRPC(const std::string &addr, uint64_t tag, request_t reque
       break;
     }
   }
-  handler->proceed();
   _mutex2.lock();
   _tag_to_handler[tag] = handler;
   _mutex2.unlock();
@@ -310,7 +270,7 @@ bool GRPCClient::waitAsyncReply(uint64_t tag) {
 
   _tag_to_handler[tag]->proceed();
   res = _tag_to_handler[tag]->getStatus().ok();
-  delete _tag_to_handler[tag];
   _tag_to_handler.erase(tag);
+  delete _tag_to_handler[tag];
   return res;
 }

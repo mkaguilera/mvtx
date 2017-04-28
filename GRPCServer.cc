@@ -9,9 +9,9 @@
 #include <thread>
 #include "GRPCServer.h"
 
-GRPCServer::RequestHandler::RequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *request_queue,
-                                           ServerCompletionQueue *reply_queue)
-    : _service(service), _request_queue(request_queue), _reply_queue(reply_queue), _status(CREATE) {}
+GRPCServer::RequestHandler::RequestHandler() {
+  _status = CREATE;
+}
 
 GRPCServer::RequestHandler::~RequestHandler() {
   if (_status != FINISH) {
@@ -20,12 +20,15 @@ GRPCServer::RequestHandler::~RequestHandler() {
   }
 }
 
-GRPCServer::ReadRequestHandler::ReadRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *request_queue,
-                                     ServerCompletionQueue *reply_queue)
-    : RequestHandler(service, request_queue, reply_queue), _responder(&_ctx) {
+GRPCServer::RequestHandler::RequestStatus GRPCServer::RequestHandler::getStatus() {
+  return _status;
+}
+
+GRPCServer::ReadRequestHandler::ReadRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *queue)
+    : RequestHandler(), _responder(&_ctx) {
   _rpc_read_args.read_args = (read_args_t *) malloc(sizeof(read_args_t));
   _status = PROCESS;
-  _service->RequestRead(&_ctx, &_request, &_responder, reply_queue, request_queue, this);
+  service->RequestRead(&_ctx, &_request, &_responder, queue, queue, this);
 }
 
 GRPCServer::ReadRequestHandler::~ReadRequestHandler() {
@@ -39,7 +42,7 @@ void GRPCServer::ReadRequestHandler::setReply() {
     std::cerr << "Status should have been 1 instead of " << _status << "." << std::endl;
     exit(1);
   }
-  read_reply.set_value(_rpc_read_args.value);
+  read_reply.set_value(*(_rpc_read_args.value));
   read_reply.set_status(_rpc_read_args.status);
   _status = FINISH;
   _responder.Finish(read_reply, Status::OK, this);
@@ -64,13 +67,12 @@ void *GRPCServer::ReadRequestHandler::getArgs() {
   return &_rpc_read_args;
 }
 
-GRPCServer::WriteRequestHandler::WriteRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *request_queue,
-                                       ServerCompletionQueue *reply_queue)
-    : RequestHandler(service, request_queue, reply_queue), _responder(&_ctx) {
+GRPCServer::WriteRequestHandler::WriteRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *queue)
+    : RequestHandler(), _responder(&_ctx) {
   _rpc_write_args.write_args = (write_args_t *) malloc(sizeof(write_args_t));
   _rpc_write_args.write_args->value = new std::string();
   _status = PROCESS;
-  _service->RequestWrite(&_ctx, &_request, &_responder, reply_queue, request_queue, this);
+  service->RequestWrite(&_ctx, &_request, &_responder, queue, queue, this);
 }
 
 GRPCServer::WriteRequestHandler::~WriteRequestHandler() {
@@ -110,15 +112,14 @@ void *GRPCServer::WriteRequestHandler::getArgs() {
 }
 
 GRPCServer::PhaseOneCommitRequestHandler::PhaseOneCommitRequestHandler(Mvtkvs::AsyncService *service,
-                                                         ServerCompletionQueue *request_queue,
-                                                         ServerCompletionQueue *reply_queue)
-    : RequestHandler(service, request_queue, reply_queue), _responder(&_ctx) {
+    ServerCompletionQueue *queue)
+    : RequestHandler(), _responder(&_ctx) {
   _rpc_p1c_args.p1c_args = (p1c_args_t *) malloc(sizeof(p1c_args_t));
-  _rpc_p1c_args.p1c_args->read_nodes = new std::set<uint64_t> ();
-  _rpc_p1c_args.p1c_args->write_nodes = new std::set<uint64_t> ();
-  _rpc_p1c_args.nodes = new std::set<uint64_t> ();
+  _rpc_p1c_args.p1c_args->read_nodes = new std::set<uint64_t>();
+  _rpc_p1c_args.p1c_args->write_nodes = new std::set<uint64_t>();
+  _rpc_p1c_args.nodes = new std::set<uint64_t>();
   _status = PROCESS;
-  _service->RequestP1C(&_ctx, &_request, &_responder, reply_queue, request_queue, this);
+  service->RequestP1C(&_ctx, &_request, &_responder, queue, queue, this);
 }
 
 GRPCServer::PhaseOneCommitRequestHandler::~PhaseOneCommitRequestHandler() {
@@ -166,13 +167,12 @@ void *GRPCServer::PhaseOneCommitRequestHandler::getArgs() {
 }
 
 GRPCServer::PhaseTwoCommitRequestHandler::PhaseTwoCommitRequestHandler(Mvtkvs::AsyncService *service,
-                                                         ServerCompletionQueue *request_queue,
-                                                         ServerCompletionQueue *reply_queue)
-    : RequestHandler(service, request_queue, reply_queue), _responder(&_ctx) {
+    ServerCompletionQueue *queue)
+    : RequestHandler(), _responder(&_ctx) {
   _rpc_p2c_args.p2c_args = (p2c_args_t *) malloc(sizeof(p2c_args_t));
-  _rpc_p2c_args.nodes = new std::set<uint64_t> ();
+  _rpc_p2c_args.nodes = new std::set<uint64_t>();
   _status = PROCESS;
-  _service->RequestP2C(&_ctx, &_request, &_responder, reply_queue, request_queue, this);
+  service->RequestP2C(&_ctx, &_request, &_responder, queue, queue, this);
 }
 
 GRPCServer::PhaseTwoCommitRequestHandler::~PhaseTwoCommitRequestHandler() {
@@ -218,98 +218,134 @@ GRPCServer::GRPCServer(int port)
 
   builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
   builder.RegisterService(&_service);
-  _request_queue = builder.AddCompletionQueue();
-  _reply_queue = builder.AddCompletionQueue();
+  _queue = builder.AddCompletionQueue();
+  _request_queue = new std::vector<RequestHandler *> ();
+  _reply_queue = new std::vector<RequestHandler *> ();
   _server = builder.BuildAndStart();
   std::cout << "Server listening on " << server_address << std::endl;
 
-  new ReadRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
-  new WriteRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
-  new PhaseOneCommitRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
-  new PhaseTwoCommitRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
+  new ReadRequestHandler(&_service, _queue.get());
+  new WriteRequestHandler(&_service, _queue.get());
+  new PhaseOneCommitRequestHandler(&_service, _queue.get());
+  new PhaseTwoCommitRequestHandler(&_service, _queue.get());
 }
 
 GRPCServer::~GRPCServer() {
-  _request_queue->Shutdown();
-  _reply_queue->Shutdown();
+  _queue->Shutdown();
+  _request_queue->clear();
+  delete _request_queue;
+  _reply_queue->clear();
+  delete _reply_queue;
   _server->Shutdown();
 }
 
-void GRPCServer::nextRequest(uint64_t *rid, request_t *request, void **args) {
+void GRPCServer::processSyncQueue() {
   void *tag;
   bool ok;
-  RequestHandler *request_handler;
+  RequestHandler *handler;
 
-  _request_queue->Next(&tag, &ok);
+  _queue->Next(&tag, &ok);
   assert(ok);
-  request_handler = static_cast<RequestHandler *>(tag);
-  *rid = reinterpret_cast<uint64_t>(tag);
-  *request = request_handler->getRequest();
-  *args = request_handler->getArgs();
-  prepareNextRequest(*request);
+  handler = static_cast<RequestHandler *>(tag);
+  if (handler->getStatus() == RequestHandler::RequestStatus::PROCESS) {
+    _request_queue->push_back(handler);
+    prepareNextRequest(handler->getRequest());
+  } else if (handler->getStatus() == RequestHandler::RequestStatus::FINISH) {
+    _reply_queue->push_back(handler);
+  }
 }
 
-bool GRPCServer::asyncNextRequest(uint64_t *rid, request_t *request, void **args) {
+void GRPCServer::processAsyncQueue() {
   void *tag;
   bool ok;
-  RequestHandler *request_handler;
-  grpc::CompletionQueue::NextStatus next_status =
-      _request_queue->AsyncNext(&tag, &ok, std::chrono::system_clock::now());
+  RequestHandler *handler;
+  grpc::CompletionQueue::NextStatus next_status;
 
-  if (next_status != grpc::CompletionQueue::NextStatus::GOT_EVENT)
-    return false;
-
-  request_handler = static_cast<RequestHandler *>(tag);
-  *rid = reinterpret_cast<uint64_t>(request_handler);
-  *request = request_handler->getRequest();
-  *args = request_handler->getArgs();
-  prepareNextRequest(*request);
-  return true;
-}
-
-void GRPCServer::sendReply(uint64_t rid) {
-  RequestHandler *request_handler = reinterpret_cast<RequestHandler *> (rid);
-
-  request_handler->setReply();
-}
-
-void GRPCServer::nextCompletedReply(uint64_t *rid) {
-  void *tag;
-  bool ok;
-
-  _reply_queue->Next(&tag, &ok);
-  assert(ok);
-  *rid= reinterpret_cast<uint64_t> (tag);
-}
-
-bool GRPCServer::asyncNextCompletedReply(uint64_t *rid) {
-  void *tag;
-  bool ok;
-  grpc::CompletionQueue::NextStatus next_status = _reply_queue->AsyncNext(&tag, &ok, std::chrono::system_clock::now());
-
-  if (next_status != grpc::CompletionQueue::NextStatus::GOT_EVENT)
-      return false;
-  *rid = reinterpret_cast<uint64_t> (tag);
-  return true;
-}
-
-void GRPCServer::deleteRequest(uint64_t rid) {
-  delete reinterpret_cast<RequestHandler *> (rid);
+  next_status = _queue->AsyncNext(&tag, &ok, std::chrono::system_clock::now());
+  while (next_status == grpc::CompletionQueue::NextStatus::GOT_EVENT) {
+    assert(ok);
+    handler = static_cast<RequestHandler *>(tag);
+    if (handler->getStatus() == RequestHandler::RequestStatus::PROCESS) {
+      _request_queue->push_back(handler);
+      prepareNextRequest(handler->getRequest());
+    } else if (handler->getStatus() == RequestHandler::RequestStatus::FINISH) {
+      _reply_queue->push_back(handler);
+    }
+    next_status = _queue->AsyncNext(&tag, &ok, std::chrono::system_clock::now());
+  }
 }
 
 void GRPCServer::prepareNextRequest(request_t request) {
   switch (request) {
     case (READ):
-      new ReadRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
+      new ReadRequestHandler(&_service, _queue.get());
       break;
     case (WRITE):
-      new WriteRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
+      new WriteRequestHandler(&_service, _queue.get());
       break;
     case (P1C):
-      new PhaseOneCommitRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
+      new PhaseOneCommitRequestHandler(&_service, _queue.get());
       break;
     case (P2C):
-      new PhaseTwoCommitRequestHandler(&_service, _request_queue.get(), _reply_queue.get());
+      new PhaseTwoCommitRequestHandler(&_service, _queue.get());
       break;
   }
+}
+
+void GRPCServer::nextRequest(uint64_t *rid, request_t *request, void **args) {
+  RequestHandler *request_handler;
+
+  while (_request_queue->empty())
+    processSyncQueue();
+  request_handler = *(_request_queue->begin());
+  _request_queue->erase(_request_queue->begin());
+  *rid = reinterpret_cast<uint64_t>(request_handler);
+  *request = request_handler->getRequest();
+  *args = request_handler->getArgs();
+}
+
+bool GRPCServer::asyncNextRequest(uint64_t *rid, request_t *request, void **args) {
+  RequestHandler *request_handler;
+
+  processAsyncQueue();
+  if (_request_queue->empty())
+    return false;
+  request_handler = *(_request_queue->begin());
+  _request_queue->erase(_request_queue->begin());
+  *rid = reinterpret_cast<uint64_t>(request_handler);
+  *request = request_handler->getRequest();
+  *args = request_handler->getArgs();
+  return true;
+}
+
+void GRPCServer::sendReply(uint64_t rid) {
+  RequestHandler *request_handler = reinterpret_cast<RequestHandler *>(rid);
+
+  request_handler->setReply();
+}
+
+void GRPCServer::nextCompletedReply(uint64_t *rid) {
+  RequestHandler *reply_handler;
+
+  while (_reply_queue->empty())
+      processSyncQueue();
+  reply_handler = *(_reply_queue->begin());
+  _reply_queue->erase(_reply_queue->begin());
+  *rid = reinterpret_cast<uint64_t>(reply_handler);
+}
+
+bool GRPCServer::asyncNextCompletedReply(uint64_t *rid) {
+  RequestHandler *reply_handler;
+
+  processAsyncQueue();
+  if (_reply_queue->empty())
+    return false;
+  reply_handler = *(_reply_queue->begin());
+  _reply_queue->erase(_reply_queue->begin());
+  *rid = reinterpret_cast<uint64_t>(reply_handler);
+  return true;
+}
+
+void GRPCServer::deleteRequest(uint64_t rid) {
+  delete reinterpret_cast<RequestHandler *>(rid);
 }

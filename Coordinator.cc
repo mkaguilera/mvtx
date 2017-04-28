@@ -20,7 +20,7 @@ Coordinator::~Coordinator() {
   _pend_writes.clear();
 }
 
-std::string Coordinator::read(uint64_t key) {
+std::string *Coordinator::read(uint64_t key) {
   std::set<uint64_t> nodes;
   rsl_read_args_t rsl_read_args;
   read_args_t read_args;

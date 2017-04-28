@@ -84,7 +84,7 @@ struct rsl_read_args_t
     ///> Arguments needed for a read request.
     read_args_t *read_args;
     ///> Return value.
-    std::string value;
+    std::string *value;
 };
 
 /**
@@ -124,7 +124,7 @@ struct rpc_read_args_t
     ///> Arguments needed for a read request.
     read_args_t *read_args;
     ///> Return value.
-    std::string value;
+    std::string *value;
     ///> Result of the request (true if the key was found).
     bool status;
 };
