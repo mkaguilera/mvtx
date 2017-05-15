@@ -5,38 +5,39 @@
  *      Author: theo
  */
 
+#include "SimpleResolutionClient.h"
+
 #include <cassert>
 #include <set>
 
-#include "DummyResolutionClient.h"
 
-DummyResolutionClient::DummyResolutionClient(RPCClient *rpc_client)
+SimpleResolutionClient::SimpleResolutionClient(RPCClient *rpc_client)
   : ResolutionClient(rpc_client) {
-  _tag = 0;
+  _tag = 135643;
 }
 
-DummyResolutionClient::~DummyResolutionClient() {
+SimpleResolutionClient::~SimpleResolutionClient() {
   _node_to_address.clear();
 }
 
-void DummyResolutionClient::findAddresses(const std::set<uint64_t> &nodes, std::set<std::string> &addresses) {
+void SimpleResolutionClient::findAddresses(const std::set<uint64_t> &nodes, std::set<std::string> &addresses) {
   std::unique_lock<std::mutex> lock(_mutex1);
 
   for (std::set<uint64_t>::iterator it = nodes.begin(); it != nodes.end(); ++it) {
     if (_node_to_address.find(*it) == _node_to_address.end())
-      _node_to_address[*it] = "localhost:10001";
+      _node_to_address[*it] = "0.0.0.0:10000";
     addresses.insert(_node_to_address[*it]);
   }
 }
 
-void DummyResolutionClient::invalidateAddresses(const std::set<uint64_t> &nodes) {
+void SimpleResolutionClient::invalidateAddresses(const std::set<uint64_t> &nodes) {
   std::unique_lock<std::mutex> lock(_mutex1);
 
   for (std::set<uint64_t>::iterator it = nodes.begin(); it != nodes.end(); ++it)
     _node_to_address.erase(*it);
 }
 
-void DummyResolutionClient::request(std::set<uint64_t> nodes, request_t request, void *args) {
+void SimpleResolutionClient::request(std::set<uint64_t> nodes, request_t request, void *args) {
   std::string server_address;
 
   switch (request) {
@@ -57,7 +58,7 @@ void DummyResolutionClient::request(std::set<uint64_t> nodes, request_t request,
         server_address = *addresses.begin();
         return;
       }
-      rsl_read_args->value = rpc_read_args.value;
+      rsl_read_args->value = new std::string(*(rpc_read_args.value));
       break;
     }
     case (WRITE):
@@ -109,7 +110,8 @@ void DummyResolutionClient::request(std::set<uint64_t> nodes, request_t request,
         for (std::set<std::string>::iterator it1 = addresses.begin(); it1 != addresses.end(); ++it1) {
           std::set<uint64_t> *updated_nodes;
 
-          _rpc_client->waitAsyncReply(tag++);
+          while (!_rpc_client->waitAsyncReply(tag));
+          tag++;
           updated_nodes = address_to_reply[*it1].nodes;
           for (std::set<uint64_t>::iterator it2 = updated_nodes->begin(); it2 != updated_nodes->end(); ++it2)
             rem_nodes.erase(*it2);
@@ -151,7 +153,8 @@ void DummyResolutionClient::request(std::set<uint64_t> nodes, request_t request,
         for (std::set<std::string>::iterator it = addresses.begin(); it != addresses.end(); ++it) {
           std::set<uint64_t> *updated_nodes;
 
-          _rpc_client->waitAsyncReply(tag++);
+          while (!_rpc_client->waitAsyncReply(tag));
+          tag++;
           updated_nodes = address_to_reply[*it].nodes;
           for (std::set<uint64_t>::iterator it2 = updated_nodes->begin(); it2 != updated_nodes->end(); ++it2)
             rem_nodes.erase(*it2);

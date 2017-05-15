@@ -270,7 +270,9 @@ bool GRPCClient::waitAsyncReply(uint64_t tag) {
 
   _tag_to_handler[tag]->proceed();
   res = _tag_to_handler[tag]->getStatus().ok();
-  _tag_to_handler.erase(tag);
-  delete _tag_to_handler[tag];
+  if (res) {
+    _tag_to_handler.erase(tag);
+    delete _tag_to_handler[tag];
+  }
   return res;
 }

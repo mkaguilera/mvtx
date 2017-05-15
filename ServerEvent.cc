@@ -34,7 +34,7 @@ void ReadEvent::run() {
     case 1:
     {
       _phase++;
-      _rpc_read_args->value = "100";
+      _rpc_read_args->value = new std::string("100");
       std::cout << "Value read " << _rpc_read_args->value << std::endl;
       _tserver->sendReply(this, _rid);
       break;

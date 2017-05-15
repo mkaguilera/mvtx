@@ -8,12 +8,12 @@ GRPC_CPP_PLUGIN = grpc_cpp_plugin
 GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
 PROTOS_PATH = ./protos
 OBJS=MvtkvsService.grpc.pb.cc MvtkvsService.pb.cc Coordinator Server
-COORD_SOURCES=GRPCClient.o DummyResolutionClient.o Coordinator.o SimpleKeyMapper.o SimpleTransactionIDGenerator.o \
+COORD_SOURCES=GRPCClient.o SimpleResolutionClient.o Coordinator.o SimpleKeyMapper.o SimpleTransactionIDGenerator.o \
               SimpleTimestampGenerator.o WithdrawCoordinator.o MvtkvsService.pb.o MvtkvsService.grpc.pb.o \
               SafeQueue.o WithdrawCoordinatorMain.o
 SERVER_SOURCES=ServerMain.o ServerEvent.o SimpleTServer.o SimpleKeyMapper.o SafeQueue.o GRPCServer.o \
                MvtkvsService.pb.o MvtkvsService.grpc.pb.o
-TESTS=LockManagerTest MvtkvsService.grpc.pb.cc MvtkvsService.pb.cc RPCTest
+TESTS=MvtkvsService.grpc.pb.cc MvtkvsService.pb.cc RunTests
 
 vpath %.proto $(PROTOS_PATH)
 
@@ -32,7 +32,7 @@ Doxygen : mvtx.doxyfile *.h *.cc
 
 GRPCClient.o : RPCClient.h GRPCClient.h GRPCClient.cc MvtkvsService.grpc.pb.h MvtkvsService.pb.h Request.h
 
-DummyResolutionClient.o : ResolutionClient.h DummyResolutionClient.h DummyResolutionClient.cc RPCClient.h Request.h \
+SimpleResolutionClient.o : ResolutionClient.h SimpleResolutionClient.h SimpleResolutionClient.cc RPCClient.h Request.h
 
 Coordinator.o : Coordinator.h Coordinator.cc KeyMapper.h TransactionIDGenerator.h TimestampGenerator.h \
                 ResolutionClient.h RPCClient.h Request.h
@@ -62,21 +62,28 @@ ServerMain.o: ServerMain.cc GRPCServer.h SafeQueue.h ServerEvent.h SimpleKeyMapp
 Server : $(SERVER_SOURCES)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
+LockManagerTest.o : Test.h LockManagerTest.h LockManagerTest.cc
+
 AVLTreeLockNode.o : LockStatus.h AVLTreeLockNode.h AVLTreeLockNode.cc
 
 AVLTreeLockManager.o : Event.h LockStatus.h LockManager.h AVLTreeLockManager.h AVLTreeLockManager.cc
 
 TestEvent.o : Event.h TestEvent.h TestEvent.cc
 
-LockManagerTest.o : Test.h LockManagerTest.h LockManagerTest.cc
-
-LockManagerTest : AVLTreeLockManager.o AVLTreeLockNode.o LockManagerTest.o TestEvent.o
-	$(CXX) $^ $(LDFLAGS) -o $@
-	
 RPCTest.o : Test.h RPCTest.h RPCTest.cc
 
-RPCTest : GRPCServer.o GRPCClient.o RPCTest.o MvtkvsService.pb.o MvtkvsService.grpc.pb.o
+ResolutionClientTest.o : Test.h ResolutionClient.h ResolutionClientTest.h ResolutionClientTest.cc
+
+CoordinatorTest.o : Test.h Coordinator.h CoordinatorTest.h CoordinatorTest.cc
+
+RunTests.o : RunTests.cc LockManagerTest.h RPCTest.h AVLTreeLockManager.h GRPCClient.h GRPCServer.h
+
+RunTests : LockManagerTest.o AVLTreeLockNode.o AVLTreeLockManager.o TestEvent.o RPCTest.o GRPCClient.o GRPCServer.o \
+					 MvtkvsService.pb.o MvtkvsService.grpc.pb.o ResolutionClientTest.o SimpleResolutionClient.o \
+					 CoordinatorTest.o  SimpleKeyMapper.o SimpleTransactionIDGenerator.o SimpleTimestampGenerator.o \
+					 WithdrawCoordinator.o Coordinator.o RunTests.o
 	$(CXX) $^ $(LDFLAGS) -o $@
+
 
 clean:
 	$(RM) -r -f html latex *.o *.pb.cc *.pb.h $(OBJS) $(TESTS)

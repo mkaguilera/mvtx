@@ -1,21 +1,21 @@
 /*
- * DummyResolutionClient.h
+ * SimpleResolutionClient.h
  *
  *  Created on: Jun 13, 2016
  *      Author: theo
  */
 
-#ifndef DUMMYRESOLUTIONCLIENT_H_
-#define DUMMYRESOLUTIONCLIENT_H_
+#ifndef SIMPLERESOLUTIONCLIENT_H_
+#define SIMPLERESOLUTIONCLIENT_H_
 
 #include <map>
 #include <mutex>
 #include "ResolutionClient.h"
 
 /**
- * Dummy implementation of ResolutionClient. All clients are supposed to go to localhost::10001.
+ * Dummy implementation of ResolutionClient. All clients are supposed to go to localhost::10000.
  */
-class DummyResolutionClient: public ResolutionClient
+class SimpleResolutionClient: public ResolutionClient
 {
   private:
     ///> Maps nodes to addresses.
@@ -30,12 +30,12 @@ class DummyResolutionClient: public ResolutionClient
      * Constructor for DummyResolutionClient.
      * @param rpc_client  - RPC Client to forward the requests.
      */
-    DummyResolutionClient(RPCClient *rpc_client);
+    SimpleResolutionClient(RPCClient *rpc_client);
 
     /**
      * Destructor for DummyResolutionClient. Cleans the dictionary from partitions to physical addresses.
      */
-    ~DummyResolutionClient();
+    ~SimpleResolutionClient();
 
   private:
     /**
@@ -54,4 +54,4 @@ class DummyResolutionClient: public ResolutionClient
     void request(std::set<uint64_t> nodes, request_t request, void *args) override;
 };
 
-#endif /* DUMMYRESOLUTIONCLIENT_H_ */
+#endif /* SIMPLERESOLUTIONCLIENT_H_ */

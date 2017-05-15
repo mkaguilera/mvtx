@@ -15,12 +15,12 @@ WithdrawCoordinator::WithdrawCoordinator(ResolutionClient *rsl_client, KeyMapper
 WithdrawCoordinator::~WithdrawCoordinator() {}
 
 bool WithdrawCoordinator::run() {
-  int balance1 = atoi(read(1).c_str());
-  int balance2 = atoi(read(2).c_str());
+  int balance1 = atoi(read(1)->c_str());
+  int balance2 = atoi(read(2)->c_str());
 
   if (balance1 + balance2 >= (int) _amount) {
     balance1 -= _amount;
-    write(1, std::to_string(balance1));
+    write(1, new std::string(std::to_string(balance1)));
   }
   return commit();
 }

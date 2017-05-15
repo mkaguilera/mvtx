@@ -39,7 +39,7 @@ std::string *Coordinator::read(uint64_t key) {
   return rsl_read_args.value;
 }
 
-void Coordinator::write(uint64_t key, std::string value) {
+void Coordinator::write(uint64_t key, std::string *value) {
   std::set<uint64_t> nodes;
   rsl_write_args_t rsl_write_args;
   write_args_t write_args;
@@ -49,7 +49,7 @@ void Coordinator::write(uint64_t key, std::string value) {
   nodes.insert(node);
   write_args.tid = _tid;
   write_args.key = key;
-  write_args.value = &value;
+  write_args.value = value;
   rsl_write_args.write_args = &write_args;
   _rsl_client->request(nodes, WRITE, &rsl_write_args);
   _write_nodes.insert(node);

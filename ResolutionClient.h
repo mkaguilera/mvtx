@@ -1,5 +1,5 @@
 /*
- * resolutionClient.h
+ * ResolutionClient.h
  *
  *  Created on: Jun 13, 2016
  *      Author: theo

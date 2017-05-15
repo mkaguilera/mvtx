@@ -38,7 +38,7 @@ class Coordinator
     ///> Nodes which are updated.
     std::set<uint64_t> _write_nodes;
     ///> Pending writes during the transaction.
-    std::map<uint64_t, std::string> _pend_writes;
+    std::map<uint64_t, std::string *> _pend_writes;
 
     /**
      * Constructor of Coordinator.
@@ -69,7 +69,7 @@ class Coordinator
      * @param key   - Key to update.
      * @param value - Value to update.
      */
-    void write(uint64_t key, std::string value);
+    void write(uint64_t key, std::string *value);
 
     /**
      * Commit transaction.

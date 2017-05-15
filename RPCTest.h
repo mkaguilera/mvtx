@@ -13,9 +13,10 @@
 #include "Test.h"
 
 /**
- * Test class for testing the implementation of the RPC layer.
+ * Test class for RPC layer.
  */
-class RPCTest : public Test {
+class RPCTest: public Test
+{
   private:
     RPCClient *_rpc_client;
     RPCServer *_rpc_server;

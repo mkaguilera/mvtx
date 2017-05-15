@@ -99,7 +99,7 @@ void RPCTest::runServer(RPCServer *rpc_server) {
   read_args->status = true;
   read_args->value = new std::string("0");
   rpc_server->sendReply(rid1);
-  rpc_server->nextCompletedReply(&rid2);
+  while (!rpc_server->asyncNextCompletedReply(&rid2));
   assert(rid1 == rid2);
   rpc_server->deleteRequest(rid2);
 
@@ -156,24 +156,6 @@ void RPCTest::run() {
 
   server_thread.join();
   client_thread.join();
-  delete _rpc_client;
-  delete _rpc_server;
 
   std::cout << "RPC test was successful." << std::endl;
-}
-
-int main(int argc, char **argv) {
-  // Take arguments.
-  if (argc != 2) {
-    std::cerr << "Usage: ./RPCTest <server port>" << std::endl;
-    return 0;
-  }
-
-  int port = atoi(argv[1]);
-  GRPCServer *grpc_server = new GRPCServer(port);
-  GRPCClient *grpc_client = new GRPCClient();
-  RPCTest rpcTest(grpc_client, grpc_server, port);
-
-  rpcTest.run();
-  return 0;
 }

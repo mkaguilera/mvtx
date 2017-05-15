@@ -5,10 +5,10 @@
  *      Author: theo
  */
 
-#include "DummyResolutionClient.h"
 #include "GRPCClient.h"
 #include "SafeQueue.h"
 #include "SimpleKeyMapper.h"
+#include "SimpleResolutionClient.h"
 #include "SimpleTimestampGenerator.h"
 #include "SimpleTransactionIDGenerator.h"
 #include "WithdrawCoordinator.h"
@@ -36,7 +36,7 @@ void *RunThreads(void *arg) {
 
 int main(int argc, char **argv) {
   GRPCClient rpc_client;
-  DummyResolutionClient rsl_client(&rpc_client);
+  SimpleResolutionClient rsl_client(&rpc_client);
   SimpleKeyMapper key_mapper;
   SimpleTransactionIDGenerator id_gen;
   SimpleTimestampGenerator ts_gen;

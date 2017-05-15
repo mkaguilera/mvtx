@@ -327,7 +327,6 @@ void GRPCServer::sendReply(uint64_t rid) {
 void GRPCServer::nextCompletedReply(uint64_t *rid) {
   RequestHandler *reply_handler;
 
-  while (_reply_queue->empty())
       processSyncQueue();
   reply_handler = *(_reply_queue->begin());
   _reply_queue->erase(_reply_queue->begin());
