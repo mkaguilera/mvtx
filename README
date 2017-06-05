@@ -1,12 +1,27 @@
-MVTX: Modular Multi-Version Transactional Key-Value Storage System v0.1
+LegoStore: Modular Multi-Version Transactional Key-Value Storage System v0.1
 
-MVTX is a distributed key-value storage system with the following features:
-- it provides serializable transactions
-- it is highly modular, permitting experimentation with different
-  components for local storage, transactional protocol, logging, RPC, etc
+LegoStore is a modular distributed key-value storage system. In particular, LegoStore permits experimentation with
+different implementations for storage, transactional protocols, communication protocols, etc. Modularity is benefitial
+for two main reasons.
+- Key-value storage systems that have a lot of similarities can share common infrastructure. For example, if two
+key-value storage systems implemented in top of LegoStore require the same consistency level, both can share the same
+concurrency control protocol implementation.
+- LegoStore provides a common platform for efficiently comparing different implementations. In particular, developers
+might modify a specific module (e.g. storage module) and observe the difference in performance without touching any of
+the other modules (minimum changes required).
 
-MVTX is a prototype currently designed for educational purposes only.
-Currently it lacks replication, but we hope to add it at some point.
+Developers can read a more detailed explanation of supported modules in the src directory. This README is oriented to
+explain installation and usage of LegoStore.
 
-Please see readme-team.txt for description of files, intended for
-developers.
+Prerequisites
+-------------
+TODO: Write about the packets.
+
+Installation
+-------------
+TODO: Write installation details
+
+Usage
+-------------
+TODO: Write 
+
