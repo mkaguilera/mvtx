@@ -1,0 +1,29 @@
+Send(requestID, operationID, operationArgs, upperLayerArgs)
+Deliver(requestID, operationID, operationsArgs, upperLayerArgs)
+
+Send API provided from bottom layer to upper layer.
+Deliver API provided from upper layer to bottom layer.
+
+Example 1: PrimaryBackup
+App -> Res/Rep
+Send(rid, REQUEST, key, false, <WRITE, key, value>)
+Res/Rep -> Network
+Send(rid, REQUEST, primary, <REQUEST, key, false, <WRITE, key, value>>)
+
+Network -> Res/Rep
+Deliver(rid, REQUEST, key, false, <WRITE, key, value>)
+
+UNSUCCESSFUL:
+Res/Rep -> Network
+Deliver(rid, REPLY, <REPLY, false, <>>)
+
+Network -> Res/Rep
+Deliver(rid, REPLY, false, <>)
+
+SUCCESSFUL:
+Res/Rep -> Network
+Send(rid, REQUEST, backup1, <PWRITE, primary, <WRITE, key, value>>)
+Send(rid, REQUEST, backup2, <PWRITE, primary, <WRITE, key, value>>)
+
+Res/Rep -> App
+Deliver(rid, WRITE, key, value)
