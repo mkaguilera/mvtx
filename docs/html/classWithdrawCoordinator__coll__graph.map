@@ -1,0 +1,7 @@
+<map id="WithdrawCoordinator" name="WithdrawCoordinator">
+<area shape="rect" id="node2" href="$classCoordinator.html" title="Coordinator" alt="" coords="189,184,278,211"/>
+<area shape="rect" id="node3" href="$classTimestampGenerator.html" title="TimestampGenerator" alt="" coords="5,95,149,121"/>
+<area shape="rect" id="node4" href="$classResolutionClient.html" title="ResolutionClient" alt="" coords="174,95,293,121"/>
+<area shape="rect" id="node5" href="$classRPCClient.html" title="RPCClient" alt="" coords="191,5,276,32"/>
+<area shape="rect" id="node6" href="$classKeyMapper.html" title="KeyMapper" alt="" coords="317,95,405,121"/>
+</map>

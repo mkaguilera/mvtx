@@ -1,0 +1,63 @@
+This README describes all the modules that need to be implemented as well as their default implementations. As of now,
+the following services are not supported:
+- Replication
+- Reconfiguration of the Mapping from Partitions to Servers
+- Garbage-Collection
+- Coordinator Failures
+
+
+Client-Side Modules
+-----------------------------------------------------------------------------------------------------------------------
+Coordinator             -> Module for coordinating the transaction protocol. Specialize run() for each transaction
+                           protocol.
+Request                 -> Enumeration of different types of requests. Arguments that are used in each request type for
+                           RPC, Resolution and Coordinator/Server layers.
+ResolutionClient        -> Module for deciding in which server(s) specific partitions reside.
+RPCClient               -> Module for Coordinator RPC protocol. Supports both blocking and non-blocking requests.
+TimestampGenerator      -> Module for generating timestamps.
+TransactionIDGenerator  -> Module for generating Transaction IDs.
+-----------------------------------------------------------------------------------------------------------------------
+
+Client-Side Implementations/Examples
+-----------------------------------------------------------------------------------------------------------------------
+WithdrawCoordinator         -> Example of a Coordinator that withdraws amount from one out of two accounts.
+SimpleResolutionClient      -> Example of resolution client. Resolves all nodes to a fixed server.
+GRPCClient                  -> Implementation of RPC Client. Supports different requests defined in proto files of
+                               gRPC. The same requests should be matched with the request enumeration in Request.h.
+SimpleTimestampGenerator    -> Example that creates timestamps according to Hardware Clock.
+SimpleTransactionIDGenerator-> Example that creates IDs incrementally (tid += 1).
+CoordinatorMain             -> Main function for client side. Combines all the examples.
+-----------------------------------------------------------------------------------------------------------------------
+
+Server-Side Modules
+-----------------------------------------------------------------------------------------------------------------------
+LockManager     -> Module for locking keys and timestamps.
+RPCServer       -> Module for handling RPC requests in the server side. Exposes interface for blocking and non-blocking
+                   processing of requests.
+Server          -> Top-level module of the server side. It contains both Resolution and Server module. Resolution
+                   module should be separated.
+ServerEvent     -> Module for defining request handlers for READ,WRITE,P1C,P2C. Also, example for MVTO request
+                   handlers. Example should be separated from module (TODO).
+-----------------------------------------------------------------------------------------------------------------------
+
+Server-Side Implementations/Examples
+-----------------------------------------------------------------------------------------------------------------------
+AVLTreeLockNode     -> Helper Class for Lock Manager. Implements AVL Self-Balancing Tree.
+AVLTreeLockManager  -> Example that uses AVL self-balancing trees (AVLTreeLockNode).
+GRPCServer          -> Example of RPCServer using gRPC.
+SimpleServer        -> Example of server that accepts every request (no checks).
+ServerMain          -> Main function for server side. Combines all the examples.
+-----------------------------------------------------------------------------------------------------------------------
+
+Common-Side Modules
+-----------------------------------------------------------------------------------------------------------------------
+KeyMapper -> Module for mapping keys to nodes.
+SafeQueue -> Helper class for MT safe queue for events in the server and requests in the coordinator side.
+-----------------------------------------------------------------------------------------------------------------------
+
+Common-Side Implementations/Examples
+-----------------------------------------------------------------------------------------------------------------------
+SimpleKeyMapper -> Example that maps keys to 0 partition.
+-----------------------------------------------------------------------------------------------------------------------
+
+For more details look at "docs/index.html".

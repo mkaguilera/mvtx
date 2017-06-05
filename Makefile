@@ -1,89 +1,61 @@
+# Directories.
+SRC_DIR=./src
+PROTOS_DIR=$(SRC_DIR)/protos
+OBJ_DIR=./obj
+BIN_DIR=./bin
+
+# Flags and command macros.
 CXX = g++
-CPPFLAGS += -I/usr/local/include -pthread
-CXXFLAGS += -std=c++11 -Wall
-LDFLAGS += -L/usr/local/lib `pkg-config --libs grpc++` -lprotobuf -lpthread -ldl -lgrpc
 RM = rm
+CPPFLAGS += -I/usr/local/include
+CXXFLAGS += -std=c++11 -Wall -pthread
+LDFLAGS += -L/usr/local/lib `pkg-config --libs grpc++` -lprotobuf -lpthread -ldl -lgrpc
+
+# GRPC and protocol buffer macros.
 PROTOC = protoc
 GRPC_CPP_PLUGIN = grpc_cpp_plugin
 GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
-PROTOS_PATH = ./protos
-OBJS=MvtkvsService.grpc.pb.cc MvtkvsService.pb.cc Coordinator Server
-COORD_SOURCES=GRPCClient.o SimpleResolutionClient.o Coordinator.o SimpleKeyMapper.o SimpleTransactionIDGenerator.o \
-              SimpleTimestampGenerator.o WithdrawCoordinator.o MvtkvsService.pb.o MvtkvsService.grpc.pb.o \
-              SafeQueue.o WithdrawCoordinatorMain.o
-SERVER_SOURCES=ServerMain.o ServerEvent.o SimpleTServer.o SimpleKeyMapper.o SafeQueue.o GRPCServer.o \
-               MvtkvsService.pb.o MvtkvsService.grpc.pb.o
-TESTS=MvtkvsService.grpc.pb.cc MvtkvsService.pb.cc RunTests
 
-vpath %.proto $(PROTOS_PATH)
+# Protocol buffer source files.
+PROTOS_SRC=$(addprefix $(SRC_DIR)/,MvtkvsService.grpc.pb.cc MvtkvsService.pb.cc)
 
-all: Doxygen $(OBJS)
+# Object files.
+PROTOS_OBJ=$(addprefix $(OBJ_DIR)/,MvtkvsService.grpc.pb.o MvtkvsService.pb.o)
+COORD_OBJ=$(addprefix $(OBJ_DIR)/,GRPCClient.o SimpleResolutionClient.o Coordinator.o SimpleKeyMapper.o \
+		  SimpleTransactionIDGenerator.o SimpleTimestampGenerator.o WithdrawCoordinator.o SafeQueue.o \
+		  WithdrawCoordinatorMain.o)
+SERVER_OBJ=$(addprefix $(OBJ_DIR)/,ServerMain.o ServerEvent.o SimpleTServer.o SimpleKeyMapper.o SafeQueue.o GRPCServer.o)
+TESTS_OBJ=$(addprefix $(OBJ_DIR)/,LockManagerTest.o TestEvent.o RPCTest.o ResolutionClientTest.o CoordinatorTest.o)
 
-tests: $(TESTS)
+# Binary files.
+BINS=$(addprefix $(BIN_DIR)/,Server Coordinator)
 
-Doxygen : mvtx.doxyfile *.h *.cc
-	doxygen mvtx.doxyfile
+# Commands.
+all: $(OBJ_DIR) $(BIN_DIR) $(BINS)
 
-%.grpc.pb.cc: %.proto
-	$(PROTOC) -I $(PROTOS_PATH) --grpc_out=. --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
+docs: $(SRC_DIR)/LegoStore.doxyfile $(SRC_DIR)/*.h $(SRC_DIR)/*.cc
+	doxygen $(SRC_DIR)/LegoStore.doxyfile
 
-%.pb.cc: %.proto
-	$(PROTOC) -I $(PROTOS_PATH) --cpp_out=. $<
+$(SRC_DIR)/%.pb.cc: $(PROTOS_DIR)/%.proto
+	$(PROTOC) -I $(PROTOS_DIR) --cpp_out=$(SRC_DIR) $<
 
-GRPCClient.o : RPCClient.h GRPCClient.h GRPCClient.cc MvtkvsService.grpc.pb.h MvtkvsService.pb.h Request.h
+$(SRC_DIR)/%.grpc.pb.cc: $(PROTOS_DIR)/%.proto
+	$(PROTOC) -I $(PROTOS_DIR) --grpc_out=$(SRC_DIR) --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
 
-SimpleResolutionClient.o : ResolutionClient.h SimpleResolutionClient.h SimpleResolutionClient.cc RPCClient.h Request.h
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 
-Coordinator.o : Coordinator.h Coordinator.cc KeyMapper.h TransactionIDGenerator.h TimestampGenerator.h \
-                ResolutionClient.h RPCClient.h Request.h
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
 
-SimpleKeyMapper.o : KeyMapper.h SimpleKeyMapper.h SimpleKeyMapper.cc
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cc
+	$(CXX) -I $(SRC_DIR) $(CXXFLAGS) $(CPP_FLAFS) -c -o $@ $<
 
-SimpleTransactionIDGenerator.o : TransactionIDGenerator.h SimpleTransactionIDGenerator.h \
-                                 SimpleTransactionIDGenerator.cc
-
-SimpleTimestampGenerator.o : TimestampGenerator.h SimpleTimestampGenerator.h SimpleTimestampGenerator.cc
-
-WithdrawCoordinator.o : Coordinator.h WithdrawCoordinator.h WithdrawCoordinator.cc SafeQueue.h KeyMapper.h \
-                        TransactionIDGenerator.h TimestampGenerator.h ResolutionClient.h RPCClient.h Request.h
-
-Coordinator : $(COORD_SOURCES)
-	 $(CXX) $^ $(LDFLAGS) -o $@
-
-GRPCServer.o : RPCServer.h GRPCServer.h GRPCServer.cc Request.h
-
-SimpleTServer.o : TServer.h SimpleTServer.h SimpleTServer.cc KeyMapper.h SafeQueue.h ServerEvent.h RPCServer.h \
-                  Request.h
-
-ServerEvent.o :ServerEvent.h ServerEvent.cc TServer.h Request.h
-
-ServerMain.o: ServerMain.cc GRPCServer.h SafeQueue.h ServerEvent.h SimpleKeyMapper.h SimpleTServer.h
-
-Server : $(SERVER_SOURCES)
+$(BIN_DIR)/Server: $(PROTOS_OBJ) $(SERVER_OBJ)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-LockManagerTest.o : Test.h LockManagerTest.h LockManagerTest.cc
-
-AVLTreeLockNode.o : LockStatus.h AVLTreeLockNode.h AVLTreeLockNode.cc
-
-AVLTreeLockManager.o : Event.h LockStatus.h LockManager.h AVLTreeLockManager.h AVLTreeLockManager.cc
-
-TestEvent.o : Event.h TestEvent.h TestEvent.cc
-
-RPCTest.o : Test.h RPCTest.h RPCTest.cc
-
-ResolutionClientTest.o : Test.h ResolutionClient.h ResolutionClientTest.h ResolutionClientTest.cc
-
-CoordinatorTest.o : Test.h Coordinator.h CoordinatorTest.h CoordinatorTest.cc
-
-RunTests.o : RunTests.cc LockManagerTest.h RPCTest.h AVLTreeLockManager.h GRPCClient.h GRPCServer.h
-
-RunTests : LockManagerTest.o AVLTreeLockNode.o AVLTreeLockManager.o TestEvent.o RPCTest.o GRPCClient.o GRPCServer.o \
-					 MvtkvsService.pb.o MvtkvsService.grpc.pb.o ResolutionClientTest.o SimpleResolutionClient.o \
-					 CoordinatorTest.o  SimpleKeyMapper.o SimpleTransactionIDGenerator.o SimpleTimestampGenerator.o \
-					 WithdrawCoordinator.o Coordinator.o RunTests.o
+$(BIN_DIR)/Coordinator: $(PROTOS_OBJ) $(SERVER_OBJ)
 	$(CXX) $^ $(LDFLAGS) -o $@
-
 
 clean:
-	$(RM) -r -f html latex *.o *.pb.cc *.pb.h $(OBJS) $(TESTS)
+	$(RM) -r -f $(OBJ_DIR) $(BIN_DIR) $(PROTOS_SRC)
