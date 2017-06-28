@@ -1,0 +1,267 @@
+Terminals unused in grammar
+
+   END
+
+
+Grammar
+
+    0 $accept: program $end
+
+    1 program: transaction
+    2        | program transaction
+
+    3 transaction: start_sequence commands end_sequence
+    4            | command
+    5            | EXIT
+    6            | HELP
+    7            | NEWLINE
+
+    8 start_sequence: START NEWLINE
+
+    9 commands: command NEWLINE
+   10         | commands command NEWLINE
+
+   11 command: READ KEY
+   12        | WRITE KEY VALUE
+
+   13 end_sequence: COMMIT NEWLINE
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+error (256)
+START (258) 8
+END (259)
+READ (260) 11
+WRITE (261) 12
+COMMIT (262) 13
+EXIT (263) 5
+HELP (264) 6
+NEWLINE (265) 7 8 9 10 13
+KEY (266) 11 12
+VALUE (267) 12
+
+
+Nonterminals, with rules where they appear
+
+$accept (13)
+    on left: 0
+program (14)
+    on left: 1 2, on right: 0 2
+transaction (15)
+    on left: 3 4 5 6 7, on right: 1 2
+start_sequence (16)
+    on left: 8, on right: 3
+commands (17)
+    on left: 9 10, on right: 3 10
+command (18)
+    on left: 11 12, on right: 4 9 10
+end_sequence (19)
+    on left: 13, on right: 3
+
+
+State 0
+
+    0 $accept: . program $end
+
+    START    shift, and go to state 1
+    READ     shift, and go to state 2
+    WRITE    shift, and go to state 3
+    EXIT     shift, and go to state 4
+    HELP     shift, and go to state 5
+    NEWLINE  shift, and go to state 6
+
+    program         go to state 7
+    transaction     go to state 8
+    start_sequence  go to state 9
+    command         go to state 10
+
+
+State 1
+
+    8 start_sequence: START . NEWLINE
+
+    NEWLINE  shift, and go to state 11
+
+
+State 2
+
+   11 command: READ . KEY
+
+    KEY  shift, and go to state 12
+
+
+State 3
+
+   12 command: WRITE . KEY VALUE
+
+    KEY  shift, and go to state 13
+
+
+State 4
+
+    5 transaction: EXIT .
+
+    $default  reduce using rule 5 (transaction)
+
+
+State 5
+
+    6 transaction: HELP .
+
+    $default  reduce using rule 6 (transaction)
+
+
+State 6
+
+    7 transaction: NEWLINE .
+
+    $default  reduce using rule 7 (transaction)
+
+
+State 7
+
+    0 $accept: program . $end
+    2 program: program . transaction
+
+    $end     shift, and go to state 14
+    START    shift, and go to state 1
+    READ     shift, and go to state 2
+    WRITE    shift, and go to state 3
+    EXIT     shift, and go to state 4
+    HELP     shift, and go to state 5
+    NEWLINE  shift, and go to state 6
+
+    transaction     go to state 15
+    start_sequence  go to state 9
+    command         go to state 10
+
+
+State 8
+
+    1 program: transaction .
+
+    $default  reduce using rule 1 (program)
+
+
+State 9
+
+    3 transaction: start_sequence . commands end_sequence
+
+    READ   shift, and go to state 2
+    WRITE  shift, and go to state 3
+
+    commands  go to state 16
+    command   go to state 17
+
+
+State 10
+
+    4 transaction: command .
+
+    $default  reduce using rule 4 (transaction)
+
+
+State 11
+
+    8 start_sequence: START NEWLINE .
+
+    $default  reduce using rule 8 (start_sequence)
+
+
+State 12
+
+   11 command: READ KEY .
+
+    $default  reduce using rule 11 (command)
+
+
+State 13
+
+   12 command: WRITE KEY . VALUE
+
+    VALUE  shift, and go to state 18
+
+
+State 14
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+State 15
+
+    2 program: program transaction .
+
+    $default  reduce using rule 2 (program)
+
+
+State 16
+
+    3 transaction: start_sequence commands . end_sequence
+   10 commands: commands . command NEWLINE
+
+    READ    shift, and go to state 2
+    WRITE   shift, and go to state 3
+    COMMIT  shift, and go to state 19
+
+    command       go to state 20
+    end_sequence  go to state 21
+
+
+State 17
+
+    9 commands: command . NEWLINE
+
+    NEWLINE  shift, and go to state 22
+
+
+State 18
+
+   12 command: WRITE KEY VALUE .
+
+    $default  reduce using rule 12 (command)
+
+
+State 19
+
+   13 end_sequence: COMMIT . NEWLINE
+
+    NEWLINE  shift, and go to state 23
+
+
+State 20
+
+   10 commands: commands command . NEWLINE
+
+    NEWLINE  shift, and go to state 24
+
+
+State 21
+
+    3 transaction: start_sequence commands end_sequence .
+
+    $default  reduce using rule 3 (transaction)
+
+
+State 22
+
+    9 commands: command NEWLINE .
+
+    $default  reduce using rule 9 (commands)
+
+
+State 23
+
+   13 end_sequence: COMMIT NEWLINE .
+
+    $default  reduce using rule 13 (end_sequence)
+
+
+State 24
+
+   10 commands: commands command NEWLINE .
+
+    $default  reduce using rule 10 (commands)
