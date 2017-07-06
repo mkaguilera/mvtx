@@ -16,16 +16,17 @@ end             { return END; }
 read            { return READ; }
 write           { return WRITE; }
 commit          { return COMMIT; }
+abort           { return ABORT; }
 exit            { return EXIT; }
 help            { return HELP; }
 \n              { return NEWLINE; }
 [0-9]+          {
-                    yylval.key = std::strtoul (yytext, NULL, 10);
-                    return KEY;
+                    yylval.number = std::strtoul (yytext, NULL, 10);
+                    return NUMBER;
                 }
 [a-zA-Z0-9]+    {
-                    yylval.value = new std::string(yytext);
-                    return VALUE;
+                    yylval.string = new std::string(yytext);
+                    return STRING;
                 }
 .               {}
 

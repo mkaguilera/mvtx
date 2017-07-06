@@ -83,117 +83,17 @@ void yyerror(const char *s);
 
 const char *typeNames[] = { "VAR", "NUM", "VALUE", "GET", "PUT", "ASSIGN", "COMMAND", "START", "END", "DEF", "RUN" };
 
-const std::string prompt("LegoShell>");
+const string prompt("LegoShell>");
 
-
-/*
-Node *makeCharNode(char c) {
-	Node *node = (Node *) malloc(sizeof(Node));
-
-	node->type = TCHAR;
-	node->c = c;
-	node->length = 0;
-
-	return node;
+void help() {
+  cout << "READ: read <key>" << endl;
+  cout << "WRITE: write <key> <value>" << endl;
+  cout << "TRX: begin <\\n> ((READ | WRITE) <\\n>)+ (commit | abort) <\\n>" << endl;
+  cout << "EXIT: exit" << endl;
 }
 
-Node *makeRangeNode(char s, char e) {
-	Node *node = (Node *) malloc(sizeof(Node));
-	
-	node->type = TRANGE;
-	node->length = 2;
-	node->children = (Node **) malloc(node->length*sizeof(Node*));
-	node->children[0] = makeCharNode(s);
-	node->children[1] = makeCharNode(e);
-	
-	return node;
-}
 
-Node *makeZeroChildNode(Type type) {
-	Node *node = (Node *) malloc(sizeof(Node));
-	
-	node->type = type;
-	node->length = 0;
-	
-	return node;
-}
-
-Node *makeOneChildNode(Type type, Node *a) {
-	Node *node = (Node *) malloc(sizeof(Node));
-	
-	node->type = type;
-	node->length = 1;
-	node->children = (Node **) malloc(node->length*sizeof(Node*));
-	node->children[0] = a;
-	
-	return node;
-}
-
-Node *makeTwoChildrenNode(Type type, Node *a, Node *b) {
-	Node *node = (Node *) malloc(sizeof(Node));
-	
-	node->type = type;
-	node->length = 2;
-	node->children = (Node **) malloc(node->length*sizeof(Node*));
-	node->children[0] = a;
-	node->children[1] = b;
-	
-	return node;
-}
-
-Node *makeThreeChildrenNode(Type type, Node *a, Node *b, Node *c) {
-	Node *node = (Node *) malloc(sizeof(Node));
-	
-	node->type = type;
-	node->length = 3;
-	node->children = (Node **) malloc(node->length*sizeof(Node*));
-	node->children[0] = a;
-	node->children[1] = b;
-	node->children[2] = c;
-	
-	return node;
-}
-
-Node *extendSequence(Node *prevNode, Node *newChild) {
-	Node *node = (Node *) malloc(sizeof(Node));
-
-	node->type = prevNode->type;
-	node->length = prevNode->length + 1;
-	node->children = (Node **) malloc(node->length*sizeof(Node*));
-	for (int i = 0; i < prevNode->length; i++)
-		node->children[i] = prevNode->children[i];
-	node->children[prevNode->length] = newChild;
-	free(prevNode);
-
-	return node;
-}
-
-Node *setType(Node *prevNode, Type newType) {
-	Node *node = prevNode;
-	
-	node->type = newType;
-
-	return node;
-}
-
-void printNode(Node *node) {
-	fprintf(yyout, "%s(", typeNames[node->type]);
-	if ((node->type == TVAR) || (node->type == TVALUE)) {
-		fprintf(yyout, "%s)", node->s);
-	} else if (node->type == TNUM) {
-	    fprintf(yyout, "%d)", node->n);
-	} else {
-		for (int i = 0; i < node->length-1; i++) {
-			printNode(node->children[i]);
-			fprintf(yyout, ",");
-		}
-		if (node->length != 0)
-			printNode(node->children[node->length-1]);
-		fprintf(yyout, ")");
-	}
-}*/
-
-#line 197 "shell.tab.c" /* yacc.c:339  */
+#line 97 "shell.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -233,11 +133,12 @@ extern int yydebug;
     READ = 260,
     WRITE = 261,
     COMMIT = 262,
-    EXIT = 263,
-    HELP = 264,
-    NEWLINE = 265,
-    KEY = 266,
-    VALUE = 267
+    ABORT = 263,
+    EXIT = 264,
+    HELP = 265,
+    NEWLINE = 266,
+    NUMBER = 267,
+    STRING = 268
   };
 #endif
 
@@ -246,12 +147,12 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 132 "shell.y" /* yacc.c:355  */
+#line 32 "shell.y" /* yacc.c:355  */
 
-    uint64_t key;
-    std::string *value;
+    uint64_t number;
+    std::string *string;
 
-#line 255 "shell.tab.c" /* yacc.c:355  */
+#line 156 "shell.tab.c" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -268,7 +169,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 272 "shell.tab.c" /* yacc.c:358  */
+#line 173 "shell.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -508,23 +409,23 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  14
+#define YYFINAL  15
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   27
+#define YYLAST   33
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  13
+#define YYNTOKENS  14
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  7
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  14
+#define YYNRULES  17
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  25
+#define YYNSTATES  29
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   267
+#define YYMAXUTOK   268
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -559,15 +460,15 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12
+       5,     6,     7,     8,     9,    10,    11,    12,    13
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   145,   145,   145,   147,   148,   149,   153,   160,   166,
-     168,   169,   172,   177,   183
+       0,    43,    43,    43,    45,    46,    47,    51,    55,    59,
+      64,    70,    74,    80,    85,    89,    95,   101
 };
 #endif
 
@@ -577,9 +478,9 @@ static const yytype_uint8 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "START", "END", "READ", "WRITE",
-  "COMMIT", "EXIT", "HELP", "NEWLINE", "KEY", "VALUE", "$accept",
-  "program", "transaction", "start_sequence", "commands", "command",
-  "end_sequence", YY_NULLPTR
+  "COMMIT", "ABORT", "EXIT", "HELP", "NEWLINE", "NUMBER", "STRING",
+  "$accept", "program", "transaction", "start_sequence", "commands",
+  "command", "end_sequence", YY_NULLPTR
 };
 #endif
 
@@ -589,14 +490,14 @@ static const char *const yytname[] =
 static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267
+     265,   266,   267,   268
 };
 # endif
 
-#define YYPACT_NINF -7
+#define YYPACT_NINF -10
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-7)))
+  (!!((Yystate) == (-10)))
 
 #define YYTABLE_NINF -1
 
@@ -607,9 +508,9 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       8,    -6,     4,    12,    -7,    -7,    -7,     0,    -7,    -4,
-      -7,    -7,    -7,    -5,    -7,    -7,    15,    14,    -7,    16,
-      17,    -7,    -7,    -7,    -7
+      11,   -10,    -9,    -8,    -5,   -10,   -10,   -10,     0,   -10,
+      13,   -10,   -10,   -10,    15,   -10,   -10,    18,     2,   -10,
+     -10,    19,    20,    21,   -10,   -10,   -10,   -10,   -10
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -617,21 +518,21 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     0,     6,     7,     8,     0,     2,     0,
-       5,     9,    12,     0,     1,     3,     0,     0,    13,     0,
-       0,     4,    10,    14,    11
+       0,     9,     0,     0,     0,     6,     7,     8,     0,     2,
+       0,     5,    10,    13,     0,     1,     3,     0,     0,    15,
+      14,     0,     0,     0,     4,    11,    16,    17,    12
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -7,    -7,    18,    -7,    -7,     3,    -7
+     -10,   -10,    25,   -10,   -10,    -2,   -10
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     7,     8,     9,    16,    10,    21
+      -1,     8,     9,    10,    17,    11,    24
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -639,39 +540,41 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-      14,     2,     3,     1,    11,     2,     3,    18,     4,     5,
-       6,     1,    17,     2,     3,    12,     4,     5,     6,    20,
-       2,     3,    19,    13,    22,    15,    23,    24
+      15,     1,    12,     2,    13,     3,     4,    14,    18,     5,
+       6,     7,     1,    25,     2,    23,     3,     4,     3,     4,
+       5,     6,     7,     3,     4,    21,    22,    19,    20,     0,
+      26,    27,    28,    16
 };
 
-static const yytype_uint8 yycheck[] =
+static const yytype_int8 yycheck[] =
 {
-       0,     5,     6,     3,    10,     5,     6,    12,     8,     9,
-      10,     3,     9,     5,     6,    11,     8,     9,    10,    16,
-       5,     6,     7,    11,    10,     7,    10,    10
+       0,     1,    11,     3,    12,     5,     6,    12,    10,     9,
+      10,    11,     1,    11,     3,    17,     5,     6,     5,     6,
+       9,    10,    11,     5,     6,     7,     8,    12,    13,    -1,
+      11,    11,    11,     8
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,     5,     6,     8,     9,    10,    14,    15,    16,
-      18,    10,    11,    11,     0,    15,    17,    18,    12,     7,
-      18,    19,    10,    10,    10
+       0,     1,     3,     5,     6,     9,    10,    11,    15,    16,
+      17,    19,    11,    12,    12,     0,    16,    18,    19,    12,
+      13,     7,     8,    19,    20,    11,    11,    11,    11
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    13,    14,    14,    15,    15,    15,    15,    15,    16,
-      17,    17,    18,    18,    19
+       0,    14,    15,    15,    16,    16,    16,    16,    16,    16,
+      17,    18,    18,    19,    19,    19,    20,    20
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     1,     2,     3,     1,     1,     1,     1,     2,
-       2,     3,     2,     3,     2
+       0,     2,     1,     2,     3,     1,     1,     1,     1,     1,
+       2,     2,     3,     2,     3,     3,     2,     2
 };
 
 
@@ -1348,61 +1251,107 @@ yyreduce:
   switch (yyn)
     {
         case 6:
-#line 150 "shell.y" /* yacc.c:1646  */
+#line 48 "shell.y" /* yacc.c:1646  */
     {
                 exit(0);
               }
-#line 1356 "shell.tab.c" /* yacc.c:1646  */
+#line 1259 "shell.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 154 "shell.y" /* yacc.c:1646  */
+#line 52 "shell.y" /* yacc.c:1646  */
     {
-                cout << "READ: read <key>" << endl;
-                cout << "WRITE: write <key> <value>" << endl;
-                cout << "TRX: begin <\\n> ((READ | WRITE) <\\n>)+ commit <\\n>" << endl;
-                cout << "EXIT: exit" << endl;
+                help();
               }
-#line 1367 "shell.tab.c" /* yacc.c:1646  */
+#line 1267 "shell.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 161 "shell.y" /* yacc.c:1646  */
+#line 56 "shell.y" /* yacc.c:1646  */
     {
                 cout << prompt;
               }
-#line 1375 "shell.tab.c" /* yacc.c:1646  */
+#line 1275 "shell.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 9:
+#line 60 "shell.y" /* yacc.c:1646  */
+    {
+              }
+#line 1282 "shell.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 10:
+#line 65 "shell.y" /* yacc.c:1646  */
+    {
+                    cout << prompt << ">";
+                  }
+#line 1290 "shell.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 11:
+#line 71 "shell.y" /* yacc.c:1646  */
+    {
+                cout << prompt << ">";
+              }
+#line 1298 "shell.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 173 "shell.y" /* yacc.c:1646  */
+#line 75 "shell.y" /* yacc.c:1646  */
     {
-            cout << "Executing read(" << (yyvsp[0].key) << ")..." << endl;
-            cout << "Result:0" << endl;
-          }
-#line 1384 "shell.tab.c" /* yacc.c:1646  */
+                cout << prompt << ">";
+              }
+#line 1306 "shell.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 178 "shell.y" /* yacc.c:1646  */
+#line 81 "shell.y" /* yacc.c:1646  */
     {
-            cout << "Executing write(" << (yyvsp[-1].key) << "," << *((yyvsp[0].value)) << ")..." << endl;
+            cout << "Executing read(" << (yyvsp[0].number) << ")..." << endl;
+            cout << "Result:0" << endl;
           }
-#line 1392 "shell.tab.c" /* yacc.c:1646  */
+#line 1315 "shell.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 184 "shell.y" /* yacc.c:1646  */
+#line 86 "shell.y" /* yacc.c:1646  */
+    {
+            cout << "Executing write(" << (yyvsp[-1].number) << ",\"" << *((yyvsp[0].string)) << "\")..." << endl;
+          }
+#line 1323 "shell.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 15:
+#line 90 "shell.y" /* yacc.c:1646  */
+    {
+            cout << "Executing write(" << (yyvsp[-1].number) << ",\"" << (yyvsp[0].number) << "\")..." << endl;
+          }
+#line 1331 "shell.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 16:
+#line 96 "shell.y" /* yacc.c:1646  */
     {
                     cout << "Executing commit..." << endl;
                     cout << "Result:Committed" << endl;
                     cout << prompt;
                   }
-#line 1402 "shell.tab.c" /* yacc.c:1646  */
+#line 1341 "shell.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 17:
+#line 102 "shell.y" /* yacc.c:1646  */
+    {
+                    cout << "Executing abort..." << endl;
+                    cout << "Result:Aborted" << endl;
+                    cout << prompt;
+                  }
+#line 1351 "shell.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1406 "shell.tab.c" /* yacc.c:1646  */
+#line 1355 "shell.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1630,18 +1579,17 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 759 "shell.y" /* yacc.c:1906  */
-
+#line 109 "shell.y" /* yacc.c:1906  */
 
 
 int main(int argc, char** argv)
 {
-    std::cout << prompt;
+    cout << prompt;
     yyparse();
     return 0;
 }
 
 void yyerror(const char *s) {
-	cout << "Parse error!" << endl << "Message: " << s << endl;
-	exit(-1);
+	cout << "Parse error: " << s << endl;
+    help();
 }

@@ -50,11 +50,12 @@ extern int yydebug;
     READ = 260,
     WRITE = 261,
     COMMIT = 262,
-    EXIT = 263,
-    HELP = 264,
-    NEWLINE = 265,
-    KEY = 266,
-    VALUE = 267
+    ABORT = 263,
+    EXIT = 264,
+    HELP = 265,
+    NEWLINE = 266,
+    NUMBER = 267,
+    STRING = 268
   };
 #endif
 
@@ -63,12 +64,12 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 132 "shell.y" /* yacc.c:1909  */
+#line 32 "shell.y" /* yacc.c:1909  */
 
-    uint64_t key;
-    std::string *value;
+    uint64_t number;
+    std::string *string;
 
-#line 72 "shell.tab.h" /* yacc.c:1909  */
+#line 73 "shell.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
