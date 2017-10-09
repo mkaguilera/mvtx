@@ -5,6 +5,7 @@
  *      Author: theo
  */
 
+#include "AVLTreeLockManager.h"
 #include "GRPCServer.h"
 #include "SafeQueue.h"
 #include "ServerEvent.h"
@@ -33,7 +34,8 @@ int main(int argc, char **argv) {
   GRPCServer grpc_server(atoi(argv[1]));
   int nr_threads = atoi(argv[2]);
   SimpleKeyMapper key_mapper;
-  SimpleTServer server(&grpc_server, &key_mapper, 1000);
+  AVLTreeLockManager lock_manager;
+  SimpleTServer server(&grpc_server, &key_mapper, &lock_manager, 1000);
   pthread_t threads[nr_threads];
   std::mutex lock;
 

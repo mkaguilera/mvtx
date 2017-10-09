@@ -41,7 +41,7 @@ void SimpleResolutionClient::request(std::set<uint64_t> nodes, request_t request
   std::string server_address;
 
   switch (request) {
-    case (READ):
+    case (TREAD):
     {
       rsl_read_args_t *rsl_read_args = (rsl_read_args_t *) args;
       rpc_read_args_t rpc_read_args;
@@ -52,7 +52,7 @@ void SimpleResolutionClient::request(std::set<uint64_t> nodes, request_t request
       findAddresses(nodes, addresses);
       assert (addresses.size() == 1);
       server_address = *addresses.begin();
-      while (!_rpc_client->syncRPC(server_address, READ, &rpc_read_args) || !rpc_read_args.status) {
+      while (!_rpc_client->syncRPC(server_address, TREAD, &rpc_read_args) || !rpc_read_args.status) {
         invalidateAddresses(nodes);
         findAddresses(nodes, addresses);
         server_address = *addresses.begin();
@@ -61,7 +61,7 @@ void SimpleResolutionClient::request(std::set<uint64_t> nodes, request_t request
       rsl_read_args->value = new std::string(*(rpc_read_args.value));
       break;
     }
-    case (WRITE):
+    case (TWRITE):
     {
       rsl_write_args_t *rsl_write_args = (rsl_write_args_t *) args;
       rpc_write_args_t rpc_write_args;
@@ -72,7 +72,7 @@ void SimpleResolutionClient::request(std::set<uint64_t> nodes, request_t request
       findAddresses(nodes, addresses);
       assert(addresses.size() == 1);
       server_address = *addresses.begin();
-      while (!_rpc_client->syncRPC(server_address, WRITE, &rpc_write_args) || !rpc_write_args.status) {
+      while (!_rpc_client->syncRPC(server_address, TWRITE, &rpc_write_args) || !rpc_write_args.status) {
         invalidateAddresses(nodes);
         findAddresses(nodes, addresses);
         server_address = *addresses.begin();
@@ -80,7 +80,7 @@ void SimpleResolutionClient::request(std::set<uint64_t> nodes, request_t request
       }
       break;
     }
-    case (P1C):
+    case (TP1C):
     {
       rsl_p1c_args_t *rsl_p1c_args = (rsl_p1c_args_t *) args;
       std::set<std::string> addresses;
@@ -102,7 +102,7 @@ void SimpleResolutionClient::request(std::set<uint64_t> nodes, request_t request
           rpc_p1c_args.p1c_args = rsl_p1c_args->p1c_args;
           rpc_p1c_args.nodes = new std::set<uint64_t> ();
           address_to_reply[*it] = rpc_p1c_args;
-          _rpc_client->asyncRPC(*it, _tag++, P1C, &address_to_reply[*it]);
+          _rpc_client->asyncRPC(*it, _tag++, TP1C, &address_to_reply[*it]);
         }
         _mutex2.unlock();
 
@@ -124,7 +124,7 @@ void SimpleResolutionClient::request(std::set<uint64_t> nodes, request_t request
       }
       break;
     }
-    case (P2C):
+    case (TP2C):
     {
       rsl_p2c_args_t *rsl_p2c_args = (rsl_p2c_args_t *) args;
       std::set<std::string> addresses;
@@ -145,7 +145,7 @@ void SimpleResolutionClient::request(std::set<uint64_t> nodes, request_t request
           rpc_p2c_args.p2c_args = rsl_p2c_args->p2c_args;
           rpc_p2c_args.nodes = new std::set<uint64_t> ();
           address_to_reply[*it] = rpc_p2c_args;
-          _rpc_client->asyncRPC(*it, _tag++, P2C, &address_to_reply[*it]);
+          _rpc_client->asyncRPC(*it, _tag++, TP2C, &address_to_reply[*it]);
         }
         _mutex2.unlock();
 

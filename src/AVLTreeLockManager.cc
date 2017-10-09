@@ -198,7 +198,7 @@ bool AVLTreeLockManager::tryBackwardLock(uint64_t key, uint64_t tid, uint64_t ts
                 << cur_lock->_start << "," << cur_lock->_end << "]" << std::endl;
       _key_map[key]->_mutex.unlock();
       pthread_rwlock_unlock(&_key_map_lock);
-      return false;
+      return (false);
     }
     switch (cur_lock->_status) {
       case FREE: {
@@ -239,15 +239,12 @@ bool AVLTreeLockManager::tryBackwardLock(uint64_t key, uint64_t tid, uint64_t ts
   }
 
   // Update the result and new root.
-  *ts_start = cur_ts;
+  *ts_start = cur_ts+1;
   _key_map[key]->_root = root;
   _key_map[key]->_mutex.unlock();
   pthread_rwlock_unlock(&_key_map_lock);
 
-  // Run event if result is successful.
-  if (res)
-    event->run();
-  return res;
+  return (res);
 }
 
 bool AVLTreeLockManager::tryLock(uint64_t key, uint64_t tid, uint64_t ts_start, uint64_t ts_end, bool is_read) {
@@ -340,7 +337,7 @@ bool AVLTreeLockManager::tryLock(uint64_t key, uint64_t tid, uint64_t ts_start, 
   _key_map[key]->_mutex.unlock();
   pthread_rwlock_unlock(&_key_map_lock);
 
-  return res;
+  return (res);
 }
 
 void AVLTreeLockManager::freeze(uint64_t tid) {
@@ -362,7 +359,7 @@ void AVLTreeLockManager::freeze(uint64_t tid) {
   tr_info = _transaction_map[tid];
   tr_info->_mutex.lock();
 
-  // Freeze all the transactions.
+  // Freeze all the locks having to do with transaction.
   for (std::map<uint64_t, std::pair<uint64_t, uint64_t> *>::iterator it = tr_info->_intervals.begin();
        it != tr_info->_intervals.end(); ++it) {
     key = it->first;
@@ -411,6 +408,7 @@ void AVLTreeLockManager::freeze(uint64_t tid) {
     }
     delete temp_pair;
     locks.clear();
+
     key_info->_mutex.unlock();
     pthread_rwlock_unlock(&_key_map_lock);
   }
@@ -437,7 +435,7 @@ void AVLTreeLockManager::unlock(uint64_t tid) {
   pthread_rwlock_rdlock(&_transaction_map_lock);
   if (_transaction_map.find(tid) == _transaction_map.end()) {
     pthread_rwlock_unlock(&_transaction_map_lock);
-    std::cerr << "AVLTreeLockManager: Freeze was called for unknown transaction " << tid << "." << std::endl;
+    std::cerr << "AVLTreeLockManager: Unlock was called for unknown transaction " << tid << "." << std::endl;
     return;
   }
   tr_info = _transaction_map[tid];
@@ -503,4 +501,9 @@ void AVLTreeLockManager::unlock(uint64_t tid) {
   // Run events.
   for (std::set<Event *>::iterator it = events.begin(); it != events.end(); ++it)
     (*it)->run();
+}
+
+std::string *AVLTreeLockManager::toString() {
+  // TODO: Implement pretty printing.
+  return (nullptr);
 }

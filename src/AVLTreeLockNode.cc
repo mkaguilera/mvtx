@@ -42,8 +42,8 @@ AVLTreeLockNode::~AVLTreeLockNode() {
 
 AVLTreeLockNode *AVLTreeLockNode::getRoot() {
   if (_parent != nullptr)
-    return _parent->getRoot();
-  return this;
+    return (_parent->getRoot());
+  return (this);
 }
 
 void AVLTreeLockNode::updateHeight() {
@@ -136,7 +136,7 @@ AVLTreeLockNode *AVLTreeLockNode::insert(AVLTreeLockNode *new_lock) {
       new_lock->_parent = this;
       balance();
     } else {
-      return _left->insert(new_lock);
+      return (_left->insert(new_lock));
     }
   } else {
     if (_right == nullptr) {
@@ -144,10 +144,10 @@ AVLTreeLockNode *AVLTreeLockNode::insert(AVLTreeLockNode *new_lock) {
       new_lock->_parent = this;
       balance();
     } else {
-      return _right->insert(new_lock);
+      return (_right->insert(new_lock));
     }
   }
-  return getRoot();
+  return (getRoot());
 }
 
 AVLTreeLockNode *AVLTreeLockNode::remove() {
@@ -208,7 +208,7 @@ AVLTreeLockNode *AVLTreeLockNode::remove() {
     _parent->balance();
   }
 
-  return getRoot();
+  return (getRoot());
 }
 
 std::string AVLTreeLockNode::toString() {
@@ -242,5 +242,5 @@ std::string AVLTreeLockNode::toString() {
     res += "\n" + _left->toString();
   if (_right != nullptr)
     res += "\n" + _right->toString();
-  return res;
+  return (res);
 }

@@ -1,5 +1,0 @@
-<map id="TServer" name="TServer">
-<area shape="rect" id="node2" href="$classRPCServer.html" title="RPCServer" alt="" coords="5,5,95,32"/>
-<area shape="rect" id="node3" href="$classKeyMapper.html" title="KeyMapper" alt="" coords="119,5,207,32"/>
-<area shape="rect" id="node4" href="$classSafeQueue.html" title="SafeQueue\&lt; void * \&gt;" alt="" coords="231,5,375,32"/>
-</map>

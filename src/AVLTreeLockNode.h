@@ -48,13 +48,11 @@ class AVLTreeLockNode
      * Constructor of AVLTreeLockNode. Initializes the tree with a root node with time interval [0,MAX_UINT].
      */
     AVLTreeLockNode();
-
     /**
      * Constructor of AVLTreeLockNode. It copies all the fields from another AVLTreeLock.
      * @param lock  - AVLTreeLockNode to copy from.
      */
     AVLTreeLockNode(AVLTreeLockNode *lock);
-
     /**
      * Destructor of AVLTreeLockNode. It destroys all transaction IDs that hold for this interval.
      */
@@ -63,22 +61,19 @@ class AVLTreeLockNode
   private:
     /**
      * Finds the root of the AVLTreeLock.
-     * @return  - Root of AVLTreeLock
+     * @return  Root of AVLTreeLock
      */
     AVLTreeLockNode *getRoot();
-
     /**
      * Updates the left and right heights of this tree.
      */
     void updateHeight();
-
     /**
      * Swap node inside an AVLTreeLock with one of its children.
      * @param is_left - Whether or not the swapped child is the left child.
-     * @return        - Root of the corresponding AVLTreeLock.
+     * @return  Root of the corresponding AVLTreeLock.
      */
     void swap(bool is_left);
-
     /**
      * Balance this tree according to AVL tree rules. The tree is balanced in respect to the starting point of their
      * time interval. If tree changes balance the predecessors.
@@ -93,24 +88,21 @@ class AVLTreeLockNode
      * @param ts    - Time value for which this search is enabled.
      */
     void find(std::vector<AVLTreeLockNode*> *locks, uint64_t ts);
-
     /**
      * Insert a new node according to AVL tree rules. The nodes are placed in respect to the starting point of their
      * time interval.
      * @param new_lock  - AVLTreeLock to be inserted in the tree.
-     * @return          - Root of the corresponding AVLTreeLock.
+     * @return  Root of the corresponding AVLTreeLock.
      */
     AVLTreeLockNode *insert(AVLTreeLockNode *new_lock);
-
     /**
      * Remove this node from AVLTreeLock.
-     * @return  - Root of the corresponding AVLTreeLock.
+     * @return  Root of the corresponding AVLTreeLock.
      */
     AVLTreeLockNode *remove();
-
     /**
      * Serialize the fields of AVLTreeLock as a string.
-     * @return  - Representative string for this AVLTreeLock.
+     * @return  Representative string for this AVLTreeLock.
      */
     std::string toString();
 };

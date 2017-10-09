@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include "shell.h"
-#include "shell.tab.h"
+#include "shell.tab.hh"
 
 using namespace std;
 %}

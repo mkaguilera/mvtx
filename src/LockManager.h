@@ -39,7 +39,7 @@ class LockManager
      * @param is_read   - Whether or not this is a read lock.
      * @param event     - Event to run when backwards lock finishes.
      * @param ts_start  - The earliest time that was actually locked (inclusive).
-     * @return          - Whether or not locking stopped at a frozen lock or the beginning of time.
+     * @return  If lock succeeds or not.
      */
     virtual bool tryBackwardLock(uint64_t key, uint64_t tid, uint64_t ts_end, bool is_read, Event *event,
         uint64_t *ts_start) = 0;
@@ -51,21 +51,27 @@ class LockManager
      * @param ts_start  - Start of the interval to lock (inclusive).
      * @param ts_end    - End of the interval to lock (inclusive).
      * @param is_read   - Whether or not this is a read lock.
-     * @return          - If lock succeeds or not.
+     * @return  If lock succeeds or not.
      */
     virtual bool tryLock(uint64_t key, uint64_t tid, uint64_t ts_start, uint64_t ts_end, bool is_read) = 0;
 
     /**
      * Freeze all the locks associated with a specific transaction.
-     * @param tid       - Transaction ID of transaction for which freeze is performed.
+     * @param tid - Transaction ID of transaction for which freeze is performed.
      */
     virtual void freeze(uint64_t tid) = 0;
 
     /**
      * Unlock all the locks associated with a specific transaction.
-     * @param tid       - Transaction ID of transaction for which unlock is performed.
+     * @param tid - Transaction ID of transaction for which unlock is performed.
      */
     virtual void unlock(uint64_t tid) = 0;
+
+    /**
+     * Pretty printing of LockManager for debugging.
+     * @return  LockManager string.
+     */
+    virtual std::string *toString() = 0;
 };
 
 #endif /* LOCKMANAGER_H_ */

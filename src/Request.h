@@ -18,7 +18,7 @@
  */
 enum request_t
 {
-  READ, WRITE, P1C, P2C
+  TREAD, TWRITE, TP1C, TP2C
 };
 
 /**

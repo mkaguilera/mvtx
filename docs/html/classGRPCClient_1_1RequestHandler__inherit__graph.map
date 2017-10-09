@@ -1,6 +1,0 @@
-<map id="GRPCClient::RequestHandler" name="GRPCClient::RequestHandler">
-<area shape="rect" id="node2" href="$classGRPCClient_1_1PhaseOneCommitRequestHandler.html" title="GRPCClient::PhaseOneCommit\lRequestHandler" alt="" coords="259,5,470,47"/>
-<area shape="rect" id="node3" href="$classGRPCClient_1_1PhaseTwoCommitRequestHandler.html" title="GRPCClient::PhaseTwoCommit\lRequestHandler" alt="" coords="259,71,470,112"/>
-<area shape="rect" id="node4" href="$classGRPCClient_1_1ReadRequestHandler.html" title="GRPCClient::ReadRequestHandler" alt="" coords="251,137,479,163"/>
-<area shape="rect" id="node5" href="$classGRPCClient_1_1WriteRequestHandler.html" title="GRPCClient::WriteRequest\lHandler" alt="" coords="273,188,456,229"/>
-</map>

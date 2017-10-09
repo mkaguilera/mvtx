@@ -24,7 +24,7 @@ public:
                       TimestampGenerator *ts_gen, uint64_t amount);
   ~WithdrawCoordinator();
 
-  bool run() override;
+  bool run();
 };
 
 #endif /* WITHDRAWCOORDINATOR_H_ */

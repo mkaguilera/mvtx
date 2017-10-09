@@ -1,13 +1,20 @@
-all: shell.exe
+OBJ_DIR=../../obj
+BIN_DIR=../../bin
+PROTOS_OBJ=$(addprefix $(OBJ_DIR)/,MvtkvsService.grpc.pb.o MvtkvsService.pb.o)
+COORD_OBJ =$(addprefix $(OBJ_DIR)/,GRPCClient.o SimpleResolutionClient.o Coordinator.o SimpleKeyMapper.o \
+		   SimpleTransactionIDGenerator.o SimpleTimestampGenerator.o SafeQueue.o)
+LDFLAGS=-L/usr/local/lib `pkg-config --libs grpc++` -lprotobuf -lpthread -ldl -lgrpc -lfl
 
-shell.tab.c shell.tab.h : shell.y shell.h
-	bison -o shell.tab.c -vd shell.y
+all: ${BIN_DIR}/shell
 
-shell.lex.c : shell.l shell.tab.h
-	flex -o shell.lex.c -l shell.l
+shell.tab.cc shell.tab.hh : shell.y shell.h
+	bison -o shell.tab.cc -vd shell.y
 
-shell.exe: shell.lex.c shell.tab.c shell.tab.h
-	g++ -std=c++11 -o legoShell shell.lex.c shell.tab.c -lfl
+shell.lex.cc : shell.l shell.tab.hh
+	flex -o shell.lex.cc -l shell.l
+
+${BIN_DIR}/shell: shell.lex.cc shell.tab.cc shell.tab.hh
+	g++ -std=c++11 -o ${BIN_DIR}/shell shell.lex.cc shell.tab.cc $(PROTOS_OBJ) $(COORD_OBJ) $(LDFLAGS)
 
 clean:
-	rm -f legoShell shell.tab.* shell.lex.*
+	rm -f ${BIN_DIR}/shell shell.tab.* shell.lex.* shell.output

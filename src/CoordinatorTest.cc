@@ -13,7 +13,7 @@
 #include "CoordinatorTest.h"
 
 CoordinatorTest::CoordinatorTest(Coordinator *coordinator, std::vector<RPCServer *> *rpc_servers, KeyMapper *key_mapper)
-    : _coordinator(coordinator), _rpc_servers(rpc_servers), _key_mapper(key_mapper) {
+: _coordinator(coordinator), _rpc_servers(rpc_servers), _key_mapper(key_mapper) {
 }
 
 CoordinatorTest::~CoordinatorTest() {
@@ -106,8 +106,7 @@ void CoordinatorTest::replyRequest(std::vector<RPCServer *> *rpc_servers, KeyMap
             break;
         }
         (*it)->sendReply(rid1);
-        while (!(*it)->asyncNextCompletedReply(&rid2))
-          ;
+        while (!(*it)->asyncNextCompletedReply(&rid2));
         assert(rid1 == rid2);
 
         // Garbage Collection.

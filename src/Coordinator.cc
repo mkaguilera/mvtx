@@ -27,16 +27,16 @@ std::string *Coordinator::read(uint64_t key) {
   uint64_t node;
 
   if (_pend_writes.find(key) != _pend_writes.end())
-    return _pend_writes[key];
+    return (_pend_writes[key]);
   node = _key_mapper->getNode(key);
   nodes.insert(node);
   read_args.tid = _tid;
   read_args.start_ts = _start_ts;
   read_args.key = key;
   rsl_read_args.read_args = &read_args;
-  _rsl_client->request(nodes, READ, &rsl_read_args);
+  _rsl_client->request(nodes, TREAD, &rsl_read_args);
   _read_nodes.insert(node);
-  return rsl_read_args.value;
+  return (rsl_read_args.value);
 }
 
 void Coordinator::write(uint64_t key, std::string *value) {
@@ -51,7 +51,7 @@ void Coordinator::write(uint64_t key, std::string *value) {
   write_args.key = key;
   write_args.value = value;
   rsl_write_args.write_args = &write_args;
-  _rsl_client->request(nodes, WRITE, &rsl_write_args);
+  _rsl_client->request(nodes, TWRITE, &rsl_write_args);
   _write_nodes.insert(node);
 }
 
@@ -65,16 +65,41 @@ bool Coordinator::commit() {
 
   p1c_args.tid = _tid;
   p1c_args.start_ts = _start_ts;
-  p1c_args.commit_ts = _ts_gen->genCommitTimestamp();
+  p1c_args.commit_ts = _start_ts; // _ts_gen->genCommitTimestamp();
   p1c_args.read_nodes = &_read_nodes;
   p1c_args.write_nodes = &_write_nodes;
   rsl_p1c_args.p1c_args = &p1c_args;
-  _rsl_client->request(nodes, P1C, &rsl_p1c_args);
+  _rsl_client->request(nodes, TP1C, &rsl_p1c_args);
   vote = rsl_p1c_args.vote;
   nodes.insert(_read_nodes.begin(), _read_nodes.end());
   p2c_args.tid = _tid;
   p2c_args.vote = vote;
   rsl_p2c_args.p2c_args = &p2c_args;
-  _rsl_client->request(nodes, P2C, &rsl_p2c_args);
+  _rsl_client->request(nodes, TP2C, &rsl_p2c_args);
   return vote;
+}
+
+void Coordinator::abort() {
+  std::set<uint64_t> nodes = _write_nodes;
+  rsl_p1c_args_t rsl_p1c_args;
+  rsl_p2c_args_t rsl_p2c_args;
+  p1c_args_t p1c_args;
+  p2c_args_t p2c_args;
+
+  p1c_args.tid = _tid;
+  p1c_args.start_ts = _start_ts;
+  p1c_args.commit_ts = _start_ts; // _ts_gen->genCommitTimestamp();
+  p1c_args.read_nodes = &_read_nodes;
+  p1c_args.write_nodes = &_write_nodes;
+  rsl_p1c_args.p1c_args = &p1c_args;
+  _rsl_client->request(nodes, TP1C, &rsl_p1c_args);
+  nodes.insert(_read_nodes.begin(), _read_nodes.end());
+  p2c_args.tid = _tid;
+  p2c_args.vote = false;
+  rsl_p2c_args.p2c_args = &p2c_args;
+  _rsl_client->request(nodes, TP2C, &rsl_p2c_args);
+}
+
+bool Coordinator::run() {
+  return false;
 }

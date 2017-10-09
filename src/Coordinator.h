@@ -22,7 +22,7 @@
  */
 class Coordinator
 {
-  protected:
+  public:
     ///> Resolution client for this coordinator.
     ResolutionClient *_rsl_client;
     ///> Map from keys to nodes.
@@ -49,40 +49,36 @@ class Coordinator
      */
     Coordinator(ResolutionClient *rsl_client, KeyMapper *key_mapper, TransactionIDGenerator *id_gen,
         TimestampGenerator *ts_gen);
-
-  public:
     /**
      * Destructor of Coordinator.
      */
     virtual ~Coordinator();
-
-  protected:
     /**
      * Read operation for a specific key.
      * @param key - Key to read from.
      * @return    - Value that corresponds to this specific key.
      */
     std::string *read(uint64_t key);
-
     /**
      * Write operation that updates the value of a key.
      * @param key   - Key to update.
      * @param value - Value to update.
      */
     void write(uint64_t key, std::string *value);
-
     /**
      * Commit transaction.
      * @return  - Whether or not the transaction committed or aborted.
      */
     bool commit();
-
-  public:
+    /**
+     * User abort transaction.
+     */
+    void abort();
     /**
      * Run this transaction.
      * @return  - Whether or not the transaction committed or aborted.
      */
-    virtual bool run() = 0;
+    bool run();
 };
 
 #endif /* COORDINATOR_H_ */

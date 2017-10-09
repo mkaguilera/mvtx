@@ -108,7 +108,6 @@ class GRPCServer: public RPCServer
          * @param service - Service (RPCs) that is going to be provided to the clients.
          * @param queue   - Queue that holds all incoming requests and all outgoing replies that have not been
          *                  processed yet.
-         * @param ctx     - Server context for GRPC server.
          */
         ReadRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *queue);
         /**
@@ -136,7 +135,6 @@ class GRPCServer: public RPCServer
          * @param service - Service (RPCs) that is going to be provided to the clients.
          * @param queue   - Queue that holds all incoming requests and all outgoing replies that have not been
          *                  processed yet.
-         * @param ctx     - Server context for GRPC server.
          */
         WriteRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *queue);
         /**
@@ -164,7 +162,6 @@ class GRPCServer: public RPCServer
          * @param service - Service (RPCs) that is going to be provided to the clients.
          * @param queue   - Queue that holds all incoming requests and all outgoing replies that have not been
          *                  processed yet.
-         * @param ctx     - Server context for GRPC server.
          */
         PhaseOneCommitRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *queue);
         /**
@@ -192,7 +189,6 @@ class GRPCServer: public RPCServer
          * @param service - Service (RPCs) that is going to be provided to the clients.
          * @param queue   - Queue that holds all incoming requests and all outgoing replies that have not been
          *                  processed yet.
-         * @param ctx     - Server context for GRPC server.
          */
         PhaseTwoCommitRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *queue);
         /**

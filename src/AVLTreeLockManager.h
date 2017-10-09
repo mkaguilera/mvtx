@@ -34,7 +34,6 @@ class AVLTreeLockManager: public LockManager
         ///> Root AVLTreeLockNode for this key.
         AVLTreeLockNode *_root;
     };
-
     ///> Information needed per transaction.
     struct TransactionInfo {
         ///> Locks access for this transaction.
@@ -67,11 +66,12 @@ class AVLTreeLockManager: public LockManager
     void addTransactionLock(uint64_t tid, uint64_t key, uint64_t start, uint64_t end);
 
   public:
-    bool tryBackwardLock(uint64_t key, uint64_t tid, uint64_t ts_end, bool is_read, Event *event,
-        uint64_t *ts_start) override;
+    bool tryBackwardLock(uint64_t key, uint64_t tid, uint64_t ts_end, bool is_read, Event *event, uint64_t *ts_start)
+         override;
     bool tryLock(uint64_t key, uint64_t tid, uint64_t ts_start, uint64_t ts_end, bool is_read) override;
     void freeze(uint64_t tid) override;
     void unlock(uint64_t tid) override;
+    std::string *toString() override;
 };
 
 #endif /* AVLTREELOCKMANAGER_H_ */

@@ -42,7 +42,8 @@ void GRPCServer::ReadRequestHandler::setReply() {
     std::cerr << "Status should have been 1 instead of " << _status << "." << std::endl;
     exit(1);
   }
-  read_reply.set_value(*(_rpc_read_args.value));
+  std::cout << "Send value " << *(_rpc_read_args.value) << std::endl;
+  read_reply.set_value(std::string(*(_rpc_read_args.value)));
   read_reply.set_status(_rpc_read_args.status);
   _status = FINISH;
   _responder.Finish(read_reply, Status::OK, this);
@@ -53,7 +54,7 @@ request_t GRPCServer::ReadRequestHandler::getRequest() {
     std::cerr << "Status should have been " << PROCESS << " instead of " << _status << "." << std::endl;
     exit(1);
   }
-  return READ;
+  return TREAD;
 }
 
 void *GRPCServer::ReadRequestHandler::getArgs() {
@@ -97,7 +98,7 @@ request_t GRPCServer::WriteRequestHandler::getRequest() {
     std::cerr << "Status should have been 1 instead of " << _status << "." << std::endl;
     exit(1);
   }
-  return WRITE;
+  return TWRITE;
 }
 
 void *GRPCServer::WriteRequestHandler::getArgs() {
@@ -148,7 +149,7 @@ request_t GRPCServer::PhaseOneCommitRequestHandler::getRequest() {
     std::cerr << "Status should have been 1 instead of " << _status << "." << std::endl;
     exit(1);
   }
-  return P1C;
+  return TP1C;
 }
 
 void *GRPCServer::PhaseOneCommitRequestHandler::getArgs() {
@@ -198,7 +199,7 @@ request_t GRPCServer::PhaseTwoCommitRequestHandler::getRequest() {
     std::cerr << "Status should have been 1 instead of " << _status << "." << std::endl;
     exit(1);
   }
-  return P2C;
+  return TP2C;
 }
 
 void *GRPCServer::PhaseTwoCommitRequestHandler::getArgs() {
@@ -277,16 +278,16 @@ void GRPCServer::processAsyncQueue() {
 
 void GRPCServer::prepareNextRequest(request_t request) {
   switch (request) {
-    case (READ):
+    case (TREAD):
       new ReadRequestHandler(&_service, _queue.get());
       break;
-    case (WRITE):
+    case (TWRITE):
       new WriteRequestHandler(&_service, _queue.get());
       break;
-    case (P1C):
+    case (TP1C):
       new PhaseOneCommitRequestHandler(&_service, _queue.get());
       break;
-    case (P2C):
+    case (TP2C):
       new PhaseTwoCommitRequestHandler(&_service, _queue.get());
       break;
   }

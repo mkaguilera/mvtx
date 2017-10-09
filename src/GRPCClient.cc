@@ -171,7 +171,7 @@ bool GRPCClient::syncRPC(const std::string &addr, request_t request, void *args)
 
   makeStub(addr);
   switch (request) {
-    case (READ):
+    case (TREAD):
     {
       rpc_read_args_t *rpc_read_args = (rpc_read_args_t *) args;
       ReadRequest request = GRPCClient::makeReadRequest(rpc_read_args->read_args);
@@ -185,7 +185,7 @@ bool GRPCClient::syncRPC(const std::string &addr, request_t request, void *args)
         rpc_read_args->value->assign(reply.value());
       break;
     }
-    case (WRITE):
+    case (TWRITE):
     {
       rpc_write_args_t *rpc_write_args = (rpc_write_args_t *) args;
       WriteRequest request = GRPCClient::makeWriteRequest(rpc_write_args->write_args);
@@ -197,7 +197,7 @@ bool GRPCClient::syncRPC(const std::string &addr, request_t request, void *args)
       rpc_write_args->status = status.ok() && reply.status();
       break;
     }
-    case (P1C):
+    case (TP1C):
     {
       rpc_p1c_args_t *rpc_p1c_args = (rpc_p1c_args_t *) args;
       PhaseOneCommitRequest request = GRPCClient::makePhaseOneCommitRequest(rpc_p1c_args->p1c_args);
@@ -213,7 +213,7 @@ bool GRPCClient::syncRPC(const std::string &addr, request_t request, void *args)
       }
       break;
     }
-    case (P2C):
+    case (TP2C):
     {
       rpc_p2c_args_t *rpc_p2c_args = (rpc_p2c_args_t *) args;
       PhaseTwoCommitRequest request = GRPCClient::makePhaseTwoCommitRequest(rpc_p2c_args->p2c_args);
@@ -238,22 +238,22 @@ void GRPCClient::asyncRPC(const std::string &addr, uint64_t tag, request_t reque
 
   makeStub(addr);
   switch(request) {
-    case (READ):
+    case (TREAD):
     {
       handler = new ReadRequestHandler(this, addr, (rpc_read_args_t *) args);
       break;
     }
-    case (WRITE):
+    case (TWRITE):
     {
       handler = new WriteRequestHandler(this, addr, (rpc_write_args_t *) args);
       break;
     }
-    case (P1C):
+    case (TP1C):
     {
       handler = new PhaseOneCommitRequestHandler(this, addr, (rpc_p1c_args_t *) args);
       break;
     }
-    case (P2C):
+    case (TP2C):
     {
       handler = new PhaseTwoCommitRequestHandler(this, addr, (rpc_p2c_args_t *) args);
       break;

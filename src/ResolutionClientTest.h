@@ -26,7 +26,7 @@ class ResolutionClientTest: public Test
     /**
      * Initiates resolution client test.
      * @param resolution_client - ResolutionClient class that needs to be tested.
-     * @param rpc_server        - Servers that need to be utilized.
+     * @param rpc_servers       - Servers that need to be utilized.
      */
     ResolutionClientTest(ResolutionClient *resolution_client, std::vector<RPCServer *> *rpc_servers);
 

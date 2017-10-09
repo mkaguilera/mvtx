@@ -1,6 +1,0 @@
-<map id="ServerEvent" name="ServerEvent">
-<area shape="rect" id="node2" href="$classTServer.html" title="TServer" alt="" coords="129,95,197,121"/>
-<area shape="rect" id="node3" href="$classRPCServer.html" title="RPCServer" alt="" coords="5,5,95,32"/>
-<area shape="rect" id="node4" href="$classKeyMapper.html" title="KeyMapper" alt="" coords="119,5,207,32"/>
-<area shape="rect" id="node5" href="$classSafeQueue.html" title="SafeQueue\&lt; void * \&gt;" alt="" coords="231,5,375,32"/>
-</map>

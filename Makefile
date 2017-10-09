@@ -24,7 +24,8 @@ PROTOS_OBJ=$(addprefix $(OBJ_DIR)/,MvtkvsService.grpc.pb.o MvtkvsService.pb.o)
 COORD_OBJ=$(addprefix $(OBJ_DIR)/,GRPCClient.o SimpleResolutionClient.o Coordinator.o SimpleKeyMapper.o \
 		  SimpleTransactionIDGenerator.o SimpleTimestampGenerator.o WithdrawCoordinator.o SafeQueue.o \
 		  WithdrawCoordinatorMain.o)
-SERVER_OBJ=$(addprefix $(OBJ_DIR)/,ServerMain.o ServerEvent.o SimpleTServer.o SimpleKeyMapper.o SafeQueue.o GRPCServer.o)
+SERVER_OBJ=$(addprefix $(OBJ_DIR)/,ServerMain.o ServerEvent.o SimpleTServer.o SimpleKeyMapper.o SafeQueue.o \
+      GRPCServer.o AVLTreeLockManager.o AVLTreeLockNode.o)
 TESTS_OBJ=$(addprefix $(OBJ_DIR)/,LockManagerTest.o TestEvent.o RPCTest.o ResolutionClientTest.o CoordinatorTest.o)
 
 # Binary files.
@@ -54,7 +55,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cc
 $(BIN_DIR)/Server: $(PROTOS_OBJ) $(SERVER_OBJ)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-$(BIN_DIR)/Coordinator: $(PROTOS_OBJ) $(SERVER_OBJ)
+$(BIN_DIR)/Coordinator: $(PROTOS_OBJ) $(COORD_OBJ)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 clean:

@@ -1,6 +1,0 @@
-<map id="ServerEvent" name="ServerEvent">
-<area shape="rect" id="node2" href="$classP1CEvent.html" title="P1CEvent" alt="" coords="5,80,88,107"/>
-<area shape="rect" id="node3" href="$classP2CEvent.html" title="P2CEvent" alt="" coords="112,80,195,107"/>
-<area shape="rect" id="node4" href="$classReadEvent.html" title="ReadEvent" alt="" coords="219,80,306,107"/>
-<area shape="rect" id="node5" href="$classWriteEvent.html" title="WriteEvent" alt="" coords="330,80,417,107"/>
-</map>

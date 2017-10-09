@@ -32,7 +32,6 @@ class CoordinatorTest: public Test
      * @param key_mapper  - Static mapping from keys to nodes.
      */
     CoordinatorTest(Coordinator *coordinator, std::vector<RPCServer *> *rpc_servers, KeyMapper *key_mapper);
-
     virtual ~CoordinatorTest();
     void run() override;
 

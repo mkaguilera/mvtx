@@ -1,6 +1,0 @@
-<map id="Test" name="Test">
-<area shape="rect" id="node2" href="$classCoordinatorTest.html" title="CoordinatorTest" alt="" coords="5,80,120,107"/>
-<area shape="rect" id="node3" href="$classLockManagerTest.html" title="LockManagerTest" alt="" coords="145,80,271,107"/>
-<area shape="rect" id="node4" href="$classResolutionClientTest.html" title="ResolutionClientTest" alt="" coords="296,80,440,107"/>
-<area shape="rect" id="node5" href="$classRPCTest.html" title="RPCTest" alt="" coords="464,80,541,107"/>
-</map>
