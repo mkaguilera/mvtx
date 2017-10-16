@@ -35,7 +35,7 @@ T SafeQueue<T>::dequeue() {
   res = _queue.front();
   _queue.pop();
   _cond1.notify_one();
-  return res;
+  return (res);
 }
 
 template <class T>
@@ -43,11 +43,11 @@ bool SafeQueue<T>::tryDequeue(T *elem) {
   std::unique_lock<std::mutex> lock(_mutex);
 
   if (_queue.size() == 0)
-    return false;
+    return (false);
   *elem = _queue.front();
   _queue.pop();
   _cond1.notify_one();
-  return true;
+  return (true);
 }
 
 template class SafeQueue<void *>;

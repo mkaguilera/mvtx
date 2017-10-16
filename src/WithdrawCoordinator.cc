@@ -22,5 +22,5 @@ bool WithdrawCoordinator::run() {
     balance1 -= _amount;
     write(1, new std::string(std::to_string(balance1)));
   }
-  return commit();
+  return (commit());
 }

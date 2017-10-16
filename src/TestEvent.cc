@@ -14,5 +14,4 @@ TestEvent::TestEvent(uint64_t event_id)
 }
 
 void TestEvent::run() {
-  return;
 }

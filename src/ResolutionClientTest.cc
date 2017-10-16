@@ -31,7 +31,7 @@ void ResolutionClientTest::replyRequest(std::vector<RPCServer *> *rpc_servers) {
     for (it = rpc_servers->begin(); it != rpc_servers->end(); ++it) {
       if ((*it)->asyncNextRequest(&rid1, &request, &args)) {
         switch (request) {
-          case READ:
+          case TREAD:
             read_args = (rpc_read_args_t *) args;
             assert(read_args->read_args->tid == 0);
             assert(read_args->read_args->key == 4);
@@ -39,14 +39,14 @@ void ResolutionClientTest::replyRequest(std::vector<RPCServer *> *rpc_servers) {
             read_args->value = new std::string("0");
             read_args->status = true;
             break;
-          case WRITE:
+          case TWRITE:
             write_args = (rpc_write_args_t *) args;
             assert(write_args->write_args->tid == 0);
             assert(write_args->write_args->key == 13);
             assert(*(write_args->write_args->value) == "100");
             write_args->status = true;
             break;
-          case P1C:
+          case TP1C:
             p1c_args = (rpc_p1c_args_t *) args;
             assert(p1c_args->p1c_args->tid == 0);
             assert(p1c_args->p1c_args->start_ts == 4);
@@ -59,7 +59,7 @@ void ResolutionClientTest::replyRequest(std::vector<RPCServer *> *rpc_servers) {
             p1c_args->nodes->insert(1);
             p1c_args->vote = true;
             break;
-          case P2C:
+          case TP2C:
             p2c_args = (rpc_p2c_args_t *) args;
             assert(p2c_args->p2c_args->tid == 0);
             assert(p2c_args->p2c_args->vote);
@@ -95,7 +95,7 @@ void ResolutionClientTest::run() {
   read_args.read_args->key = 4;
   read_args.read_args->start_ts = 30;
   read_args.value = new std::string();
-  _resolution_client->request(read_nodes, READ, (void *) &read_args);
+  _resolution_client->request(read_nodes, TREAD, (void *) &read_args);
   assert(*(read_args.value) == "0");
   free(read_args.read_args);
   delete read_args.value;
@@ -104,7 +104,7 @@ void ResolutionClientTest::run() {
   write_args.write_args->tid = 0;
   write_args.write_args->key = 13;
   write_args.write_args->value = new std::string("100");
-  _resolution_client->request(write_nodes, WRITE, &write_args);
+  _resolution_client->request(write_nodes, TWRITE, &write_args);
   free(write_args.write_args);
 
   p1c_args.p1c_args = (p1c_args_t *) malloc(sizeof(p1c_args_t));
@@ -113,7 +113,7 @@ void ResolutionClientTest::run() {
   p1c_args.p1c_args->commit_ts = 4;
   p1c_args.p1c_args->read_nodes = new std::set<uint64_t> (read_nodes);
   p1c_args.p1c_args->write_nodes = new std::set<uint64_t> (write_nodes);
-  _resolution_client->request(write_nodes, P1C, &p1c_args);
+  _resolution_client->request(write_nodes, TP1C, &p1c_args);
   assert(p1c_args.vote);
   delete p1c_args.p1c_args->read_nodes;
   delete p1c_args.p1c_args->write_nodes;
@@ -122,7 +122,7 @@ void ResolutionClientTest::run() {
   p2c_args.p2c_args = (p2c_args_t *) malloc(sizeof(p2c_args_t));
   p2c_args.p2c_args->tid = 0;
   p2c_args.p2c_args->vote = true;
-  _resolution_client->request(read_nodes, P2C, &p2c_args);
+  _resolution_client->request(read_nodes, TP2C, &p2c_args);
   free(p2c_args.p2c_args);
 
   server_thread.join();

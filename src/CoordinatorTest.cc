@@ -45,7 +45,7 @@ void CoordinatorTest::replyRequest(std::vector<RPCServer *> *rpc_servers, KeyMap
     for (it = rpc_servers->begin(); it != rpc_servers->end(); ++it) {
       if ((*it)->asyncNextRequest(&rid1, &request, &args)) {
         switch (request) {
-          case READ:
+          case TREAD:
             read_args = (rpc_read_args_t *) args;
             tid = read_args->read_args->tid;
             node = key_mapper->getNode(read_args->read_args->key);
@@ -60,7 +60,7 @@ void CoordinatorTest::replyRequest(std::vector<RPCServer *> *rpc_servers, KeyMap
             read_args->value = new std::string("100");
             read_args->status = true;
             break;
-          case WRITE:
+          case TWRITE:
             write_args = (rpc_write_args_t *) args;
             assert(write_args->write_args->tid == tid);
             node = key_mapper->getNode(write_args->write_args->key);
@@ -68,7 +68,7 @@ void CoordinatorTest::replyRequest(std::vector<RPCServer *> *rpc_servers, KeyMap
             nodes[*it].insert(node);
             write_args->status = true;
             break;
-          case P1C:
+          case TP1C:
             p1c_args = (rpc_p1c_args_t *) args;
             assert(p1c_args->p1c_args->tid == tid);
             if (!set_start) {
@@ -95,7 +95,7 @@ void CoordinatorTest::replyRequest(std::vector<RPCServer *> *rpc_servers, KeyMap
             p1c_args->nodes = new std::set<uint64_t> (nodes[*it]);
             p1c_args->vote = true;
             break;
-          case P2C:
+          case TP2C:
             p2c_args = (rpc_p2c_args_t *) args;
             assert(p2c_args->p2c_args->tid == tid);
             assert(p2c_args->p2c_args->vote);

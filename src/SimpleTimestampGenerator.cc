@@ -15,13 +15,13 @@ uint64_t SimpleTimestampGenerator::getCurrentTime() {
   time_t timev;
 
   time(&timev);
-  return (uint64_t) timev;
+  return ((uint64_t) timev);
 }
 
 uint64_t SimpleTimestampGenerator::genStartTimestamp() {
-  return getCurrentTime();
+  return (getCurrentTime());
 }
 
 uint64_t SimpleTimestampGenerator::genCommitTimestamp() {
-  return getCurrentTime();
+  return (getCurrentTime());
 }

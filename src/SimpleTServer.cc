@@ -39,7 +39,7 @@ ServerEvent *SimpleTServer::getEvent() {
     while ((!_queue.tryDequeue(&res)) && (!_rpc_server->asyncNextRequest(&rid1, &request, &request_args)) &&
            (!_rpc_server->asyncNextCompletedReply(&rid2)));
     if (res != NULL)
-      return reinterpret_cast<ServerEvent *> (res);
+      return (reinterpret_cast<ServerEvent *> (res));
     if (rid1 != 0) {
       switch (request) {
         case TREAD: {
@@ -116,12 +116,12 @@ ServerEvent *SimpleTServer::getEvent() {
           break;
         }
       }
-      return reinterpret_cast<ServerEvent *> (res);
+      return (reinterpret_cast<ServerEvent *> (res));
     }
     if (rid2 != 0)
       _rpc_server->deleteRequest(rid2);
   }
-  return nullptr;
+  return (nullptr);
 }
 
 void SimpleTServer::addEvent(ServerEvent *event) {
@@ -134,15 +134,15 @@ void SimpleTServer::sendReply(ServerEvent *event, uint64_t rid) {
 
 std::string *SimpleTServer::get(uint64_t key, uint64_t ts) {
   if (ts == 0)
-    return new std::string("0");
+    return (new std::string("0"));
   if (_store.find(key) == _store.end())
-    return nullptr;
+    return (nullptr);
   if (_store[key]->find(ts) == _store[key]->end()) {
     std::cout << "Asked for key " << key << " and ts " << ts << " that cannot be found." << std::endl;
-    return nullptr;
+    return (nullptr);
   }
   std::cout << (*_store[key])[ts] << std::endl;
-  return &((*_store[key])[ts]);
+  return (&((*_store[key])[ts]));
 }
 
 void SimpleTServer::set(uint64_t key, uint64_t ts, std::string *value) {
@@ -163,11 +163,11 @@ std::vector<uint64_t> *SimpleTServer::getKeys(uint64_t tid) {
 
   if (_pend_writes.find(tid) == _pend_writes.end()) {
     std::cout << "Writes for transaction ID " << tid << " do not exist." << std::endl;
-    return res;
+    return (res);
   }
   for (uint64_t i = 0; i < _pend_writes[tid]->size(); i++)
     res->push_back((*_pend_writes[tid])[i].first);
-  return res;
+  return (res);
 }
 
 void SimpleTServer::prepare(uint64_t tid, uint64_t ts) {

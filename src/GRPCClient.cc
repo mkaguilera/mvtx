@@ -17,7 +17,7 @@ GRPCClient::RequestHandler::~RequestHandler() {
 }
 
 Status GRPCClient::RequestHandler::getStatus() {
-  return _status;
+  return (_status);
 }
 
 GRPCClient::ReadRequestHandler::ReadRequestHandler(GRPCClient *grpc_client, const std::string &addr,
@@ -123,7 +123,7 @@ void GRPCClient::makeStub(const std::string &addr) {
 Mvtkvs::Stub *GRPCClient::getStub(std::string addr) {
   std::unique_lock<std::mutex> lock(_mutex1);
 
-  return _address_to_stub[addr].get();
+  return (_address_to_stub[addr].get());
 }
 
 ReadRequest GRPCClient::makeReadRequest(const read_args_t *read_args) {
@@ -132,7 +132,7 @@ ReadRequest GRPCClient::makeReadRequest(const read_args_t *read_args) {
   res.set_tid(read_args->tid);
   res.set_start_ts(read_args->start_ts);
   res.set_key(read_args->key);
-  return res;
+  return (res);
 }
 
 WriteRequest GRPCClient::makeWriteRequest(const write_args_t *write_args) {
@@ -141,7 +141,7 @@ WriteRequest GRPCClient::makeWriteRequest(const write_args_t *write_args) {
   res.set_tid(write_args->tid);
   res.set_key(write_args->key);
   res.set_value(*(write_args->value));
-  return res;
+  return (res);
 }
 
 PhaseOneCommitRequest GRPCClient::makePhaseOneCommitRequest(const p1c_args_t *p1c_args) {
@@ -154,7 +154,7 @@ PhaseOneCommitRequest GRPCClient::makePhaseOneCommitRequest(const p1c_args_t *p1
     res.add_read_node(*it);
   for (std::set<uint64_t>::iterator it = p1c_args->write_nodes->begin(); it != p1c_args->write_nodes->end(); ++it)
     res.add_write_node(*it);
-  return res;
+  return (res);
 }
 
 PhaseTwoCommitRequest GRPCClient::makePhaseTwoCommitRequest(const p2c_args_t *p2c_args) {
@@ -162,7 +162,7 @@ PhaseTwoCommitRequest GRPCClient::makePhaseTwoCommitRequest(const p2c_args_t *p2
 
   res.set_tid(p2c_args->tid);
   res.set_vote(p2c_args->vote);
-  return res;
+  return (res);
 }
 
 bool GRPCClient::syncRPC(const std::string &addr, request_t request, void *args) {
@@ -230,7 +230,7 @@ bool GRPCClient::syncRPC(const std::string &addr, request_t request, void *args)
     }
   }
 
-  return status.ok();
+  return (status.ok());
 }
 
 void GRPCClient::asyncRPC(const std::string &addr, uint64_t tag, request_t request, void *args) {
@@ -274,5 +274,5 @@ bool GRPCClient::waitAsyncReply(uint64_t tag) {
     _tag_to_handler.erase(tag);
     delete _tag_to_handler[tag];
   }
-  return res;
+  return (res);
 }

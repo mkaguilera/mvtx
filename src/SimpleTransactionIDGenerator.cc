@@ -16,5 +16,5 @@ SimpleTransactionIDGenerator::~SimpleTransactionIDGenerator() {}
 uint64_t SimpleTransactionIDGenerator::genTransactionID() {
   std::unique_lock<std::mutex> lock(_mutex);
 
-  return _cur_id++;
+  return (_cur_id++);
 }

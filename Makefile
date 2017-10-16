@@ -1,15 +1,17 @@
 # Directories.
 SRC_DIR=./src
+SHELL_DIR=$(SRC_DIR)/shell
 PROTOS_DIR=$(SRC_DIR)/protos
 OBJ_DIR=./obj
 BIN_DIR=./bin
+DOC_DIR=./docs
 
 # Flags and command macros.
 CXX = g++
 RM = rm
 CPPFLAGS += -I/usr/local/include
 CXXFLAGS += -std=c++11 -Wall -pthread
-LDFLAGS += -L/usr/local/lib `pkg-config --libs grpc++` -lprotobuf -lpthread -ldl -lgrpc
+LDFLAGS += -L/usr/local/lib `pkg-config --libs grpc++` -lprotobuf -lpthread -ldl -lgrpc -lfl
 
 # GRPC and protocol buffer macros.
 PROTOC = protoc
@@ -26,16 +28,21 @@ COORD_OBJ=$(addprefix $(OBJ_DIR)/,GRPCClient.o SimpleResolutionClient.o Coordina
 		  WithdrawCoordinatorMain.o)
 SERVER_OBJ=$(addprefix $(OBJ_DIR)/,ServerMain.o ServerEvent.o SimpleTServer.o SimpleKeyMapper.o SafeQueue.o \
       GRPCServer.o AVLTreeLockManager.o AVLTreeLockNode.o)
+SHELL_OBJ=$(addprefix $(OBJ_DIR)/,GRPCClient.o SimpleResolutionClient.o Coordinator.o SimpleKeyMapper.o \
+		  SimpleTransactionIDGenerator.o SimpleTimestampGenerator.o SafeQueue.o)
 TESTS_OBJ=$(addprefix $(OBJ_DIR)/,LockManagerTest.o TestEvent.o RPCTest.o ResolutionClientTest.o CoordinatorTest.o)
 
 # Binary files.
 BINS=$(addprefix $(BIN_DIR)/,Server Coordinator)
+SHELL_BIN=$(BIN_DIR)/Shell
 
 # Commands.
 all: $(OBJ_DIR) $(BIN_DIR) $(BINS)
 
-docs: $(SRC_DIR)/LegoStore.doxyfile $(SRC_DIR)/*.h $(SRC_DIR)/*.cc
-	doxygen $(SRC_DIR)/LegoStore.doxyfile
+shell: $(SHELL_BIN)
+
+docs: LegoStore.doxyfile $(SRC_DIR)/*.h $(SRC_DIR)/*.cc
+	doxygen LegoStore.doxyfile
 
 $(SRC_DIR)/%.pb.cc: $(PROTOS_DIR)/%.proto
 	$(PROTOC) -I $(PROTOS_DIR) --cpp_out=$(SRC_DIR) $<
@@ -58,5 +65,15 @@ $(BIN_DIR)/Server: $(PROTOS_OBJ) $(SERVER_OBJ)
 $(BIN_DIR)/Coordinator: $(PROTOS_OBJ) $(COORD_OBJ)
 	$(CXX) $^ $(LDFLAGS) -o $@
 
+$(SHELL_DIR)/shell.tab.cc $(SHELL_DIR)/shell.tab.hh : $(SHELL_DIR)/shell.y $(SHELL_DIR)/shell.h
+	bison -o $(SHELL_DIR)/shell.tab.cc -vd $(SHELL_DIR)/shell.y
+
+$(SHELL_DIR)/shell.lex.cc : $(SHELL_DIR)/shell.l $(SHELL_DIR)/shell.tab.hh
+	flex -o $(SHELL_DIR)/shell.lex.cc -l $(SHELL_DIR)/shell.l
+
+$(BIN_DIR)/Shell: $(SHELL_DIR)/shell.lex.cc $(SHELL_DIR)/shell.tab.cc $(SHELL_DIR)/shell.tab.hh
+	g++ -std=c++11 -o $(BIN_DIR)/Shell $(SHELL_DIR)/shell.lex.cc $(SHELL_DIR)/shell.tab.cc $(PROTOS_OBJ) $(SHELL_OBJ) $(LDFLAGS)
+
 clean:
-	$(RM) -r -f $(OBJ_DIR) $(BIN_DIR) $(PROTOS_SRC)
+	$(RM) -r -f $(OBJ_DIR) $(BIN_DIR) $(PROTOS_SRC) $(addprefix $(SHELL_DIR)/,shell.lex.cc shell.output shell.tab.cc shell.tab.hh) $(DOC_DIR)
+

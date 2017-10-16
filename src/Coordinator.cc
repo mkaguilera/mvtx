@@ -76,7 +76,7 @@ bool Coordinator::commit() {
   p2c_args.vote = vote;
   rsl_p2c_args.p2c_args = &p2c_args;
   _rsl_client->request(nodes, TP2C, &rsl_p2c_args);
-  return vote;
+  return (vote);
 }
 
 void Coordinator::abort() {
@@ -101,5 +101,5 @@ void Coordinator::abort() {
 }
 
 bool Coordinator::run() {
-  return false;
+  return (false);
 }

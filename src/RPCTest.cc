@@ -30,7 +30,7 @@ void RPCTest::runClient(RPCClient *rpc_client, int port) {
   read_args->read_args->tid = 0;
   read_args->read_args->key = 135;
   read_args->read_args->start_ts = 254;
-  rpc_client->asyncRPC("0.0.0.0:" + std::to_string(port), 1, READ, (void *) read_args);
+  rpc_client->asyncRPC("0.0.0.0:" + std::to_string(port), 1, TREAD, (void *) read_args);
   assert(rpc_client->waitAsyncReply(1));
   assert(read_args->status);
   assert((*(read_args->value)) == "0");
@@ -42,7 +42,7 @@ void RPCTest::runClient(RPCClient *rpc_client, int port) {
   write_args->write_args->tid = 0;
   write_args->write_args->key = 1;
   write_args->write_args->value = new std::string("1");
-  rpc_client->asyncRPC("0.0.0.0:" + std::to_string(port), 2, WRITE, write_args);
+  rpc_client->asyncRPC("0.0.0.0:" + std::to_string(port), 2, TWRITE, write_args);
   assert(rpc_client->waitAsyncReply(2));
   assert(write_args->status);
   free(write_args->write_args);
@@ -58,7 +58,7 @@ void RPCTest::runClient(RPCClient *rpc_client, int port) {
   p1c_args->p1c_args->write_nodes = new std::set<uint64_t>();
   p1c_args->p1c_args->write_nodes->insert(1);
   p1c_args->nodes = new std::set<uint64_t> ();
-  rpc_client->asyncRPC("0.0.0.0:" + std::to_string(port), 3, P1C, p1c_args);
+  rpc_client->asyncRPC("0.0.0.0:" + std::to_string(port), 3, TP1C, p1c_args);
   assert(rpc_client->waitAsyncReply(3));
   assert(p1c_args->nodes->size() == 1);
   assert(*(p1c_args->nodes->begin()) == 2);
@@ -71,7 +71,7 @@ void RPCTest::runClient(RPCClient *rpc_client, int port) {
   p2c_args->p2c_args->tid = 0;
   p2c_args->p2c_args->vote = true;
   p2c_args->nodes = new std::set<uint64_t> ();
-  rpc_client->asyncRPC("0.0.0.0:" + std::to_string(port), 4, P2C, p2c_args);
+  rpc_client->asyncRPC("0.0.0.0:" + std::to_string(port), 4, TP2C, p2c_args);
   assert(rpc_client->waitAsyncReply(4));
   assert(p2c_args->nodes->size() == 1);
   assert(*(p2c_args->nodes->begin()) == 3);
@@ -91,7 +91,7 @@ void RPCTest::runServer(RPCServer *rpc_server) {
   std::set<uint64_t> *nodes = new std::set<uint64_t> ();
 
   while (!(rpc_server->asyncNextRequest(&rid1, &request, &args) || rpc_server->asyncNextCompletedReply(&rid1)));
-  assert(request == READ);
+  assert(request == TREAD);
   read_args = (rpc_read_args_t *) args;
   assert(read_args->read_args->tid == 0);
   assert(read_args->read_args->key == 135);
@@ -104,7 +104,7 @@ void RPCTest::runServer(RPCServer *rpc_server) {
   rpc_server->deleteRequest(rid2);
 
   while (!rpc_server->asyncNextRequest(&rid1, &request, &args));
-  assert(request == WRITE);
+  assert(request == TWRITE);
   write_args = (rpc_write_args_t *) args;
   assert(write_args->write_args->tid == 0);
   assert(write_args->write_args->key == 1);
@@ -116,7 +116,7 @@ void RPCTest::runServer(RPCServer *rpc_server) {
   rpc_server->deleteRequest(rid2);
 
   while (!rpc_server->asyncNextRequest(&rid1, &request, &args));
-  assert(request == P1C);
+  assert(request == TP1C);
   p1c_args = (rpc_p1c_args_t *) args;
   assert(p1c_args->p1c_args->tid == 0);
   assert(p1c_args->p1c_args->start_ts == 2);
@@ -136,7 +136,7 @@ void RPCTest::runServer(RPCServer *rpc_server) {
   nodes->clear();
 
   while (!rpc_server->asyncNextRequest(&rid1, &request, &args));
-  assert(request == P2C);
+  assert(request == TP2C);
   p2c_args = (rpc_p2c_args_t *) args;
   assert(p2c_args->p2c_args->tid == 0);
   assert(p2c_args->p2c_args->vote);

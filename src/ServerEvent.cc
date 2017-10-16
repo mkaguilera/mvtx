@@ -36,7 +36,7 @@ void ReadEvent::run() {
     case 1:
     {
       _phase++;
-      _rpc_read_args->value = _tserver->get(key, ts);
+      _rpc_read_args->value = _tserver->get(key, ts-1);
       std::cout << "Value read " << *(_rpc_read_args->value) << std::endl;
       _tserver->sendReply(this, _rid);
       break;

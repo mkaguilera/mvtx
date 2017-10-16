@@ -46,7 +46,7 @@ public:
   virtual void finalize(uint64_t tid, bool success) = 0;
 
   LockManager *getLockManager() {
-    return _lock_manager;
+    return (_lock_manager);
   }
 };
 

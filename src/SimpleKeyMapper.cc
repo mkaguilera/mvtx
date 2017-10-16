@@ -11,5 +11,5 @@ SimpleKeyMapper::SimpleKeyMapper() {}
 SimpleKeyMapper::~SimpleKeyMapper () {}
 
 uint64_t SimpleKeyMapper::getNode(uint64_t key) {
-  return 0;
+  return (0);
 }

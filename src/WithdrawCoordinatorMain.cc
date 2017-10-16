@@ -13,7 +13,7 @@
 #include "SimpleTransactionIDGenerator.h"
 #include "WithdrawCoordinator.h"
 
-void *RunThreads(void *arg) {
+void *run(void *arg) {
   SafeQueue<void *> *queue = (SafeQueue<void *> *) arg;
   Coordinator * coord;
   time_t old_time, new_time;
@@ -57,13 +57,13 @@ int main(int argc, char **argv) {
   }
   threads = (pthread_t *) malloc(nr_threads*sizeof(pthread_t));
   for (int i = 0; i < nr_threads; i++) {
-    if (pthread_create(&threads[i], NULL, RunThreads, (void *) &queue)) {
+    if (pthread_create(&threads[i], NULL, run, (void *) &queue)) {
       std::cerr << "Error:unable to create thread" << std::endl;
       exit(1);
     }
   }
   for (int i = 0; i < nr_threads; i++)
     pthread_join(threads[i], NULL);
-  return 0;
+  return (0);
 }
 

@@ -21,7 +21,7 @@ GRPCServer::RequestHandler::~RequestHandler() {
 }
 
 GRPCServer::RequestHandler::RequestStatus GRPCServer::RequestHandler::getStatus() {
-  return _status;
+  return (_status);
 }
 
 GRPCServer::ReadRequestHandler::ReadRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *queue)
@@ -54,7 +54,7 @@ request_t GRPCServer::ReadRequestHandler::getRequest() {
     std::cerr << "Status should have been " << PROCESS << " instead of " << _status << "." << std::endl;
     exit(1);
   }
-  return TREAD;
+  return (TREAD);
 }
 
 void *GRPCServer::ReadRequestHandler::getArgs() {
@@ -65,7 +65,7 @@ void *GRPCServer::ReadRequestHandler::getArgs() {
   _rpc_read_args.read_args->tid = _request.tid();
   _rpc_read_args.read_args->start_ts = _request.start_ts();
   _rpc_read_args.read_args->key = _request.key();
-  return &_rpc_read_args;
+  return (&_rpc_read_args);
 }
 
 GRPCServer::WriteRequestHandler::WriteRequestHandler(Mvtkvs::AsyncService *service, ServerCompletionQueue *queue)
@@ -98,7 +98,7 @@ request_t GRPCServer::WriteRequestHandler::getRequest() {
     std::cerr << "Status should have been 1 instead of " << _status << "." << std::endl;
     exit(1);
   }
-  return TWRITE;
+  return (TWRITE);
 }
 
 void *GRPCServer::WriteRequestHandler::getArgs() {
@@ -109,7 +109,7 @@ void *GRPCServer::WriteRequestHandler::getArgs() {
   _rpc_write_args.write_args->tid = _request.tid();
   _rpc_write_args.write_args->key = _request.key();
   _rpc_write_args.write_args->value->assign(_request.value());
-  return &_rpc_write_args;
+  return (&_rpc_write_args);
 }
 
 GRPCServer::PhaseOneCommitRequestHandler::PhaseOneCommitRequestHandler(Mvtkvs::AsyncService *service,
@@ -149,7 +149,7 @@ request_t GRPCServer::PhaseOneCommitRequestHandler::getRequest() {
     std::cerr << "Status should have been 1 instead of " << _status << "." << std::endl;
     exit(1);
   }
-  return TP1C;
+  return (TP1C);
 }
 
 void *GRPCServer::PhaseOneCommitRequestHandler::getArgs() {
@@ -164,7 +164,7 @@ void *GRPCServer::PhaseOneCommitRequestHandler::getArgs() {
     _rpc_p1c_args.p1c_args->read_nodes->insert(_request.read_node(i));
   for (int i = 0; i < _request.write_node_size(); i++)
     _rpc_p1c_args.p1c_args->write_nodes->insert(_request.write_node(i));
-  return &_rpc_p1c_args;
+  return (&_rpc_p1c_args);
 }
 
 GRPCServer::PhaseTwoCommitRequestHandler::PhaseTwoCommitRequestHandler(Mvtkvs::AsyncService *service,
@@ -199,7 +199,7 @@ request_t GRPCServer::PhaseTwoCommitRequestHandler::getRequest() {
     std::cerr << "Status should have been 1 instead of " << _status << "." << std::endl;
     exit(1);
   }
-  return TP2C;
+  return (TP2C);
 }
 
 void *GRPCServer::PhaseTwoCommitRequestHandler::getArgs() {
@@ -209,7 +209,7 @@ void *GRPCServer::PhaseTwoCommitRequestHandler::getArgs() {
   }
   _rpc_p2c_args.p2c_args->tid = _request.tid();
   _rpc_p2c_args.p2c_args->vote = _request.vote();
-  return &_rpc_p2c_args;
+  return (&_rpc_p2c_args);
 }
 
 GRPCServer::GRPCServer(int port)
@@ -310,13 +310,13 @@ bool GRPCServer::asyncNextRequest(uint64_t *rid, request_t *request, void **args
 
   processAsyncQueue();
   if (_request_queue->empty())
-    return false;
+    return (false);
   request_handler = *(_request_queue->begin());
   _request_queue->erase(_request_queue->begin());
   *rid = reinterpret_cast<uint64_t>(request_handler);
   *request = request_handler->getRequest();
   *args = request_handler->getArgs();
-  return true;
+  return (true);
 }
 
 void GRPCServer::sendReply(uint64_t rid) {
@@ -339,11 +339,11 @@ bool GRPCServer::asyncNextCompletedReply(uint64_t *rid) {
 
   processAsyncQueue();
   if (_reply_queue->empty())
-    return false;
+    return (false);
   reply_handler = *(_reply_queue->begin());
   _reply_queue->erase(_reply_queue->begin());
   *rid = reinterpret_cast<uint64_t>(reply_handler);
-  return true;
+  return (true);
 }
 
 void GRPCServer::deleteRequest(uint64_t rid) {
