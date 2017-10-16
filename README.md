@@ -13,7 +13,7 @@ Developers can read a more detailed explanation of supported modules in the src 
 Prerequisites
 -------------
 * Protocol Buffers  
-  Version: > 3.0.0  
+  Version: >= 3.0.0  
   [Source](https://github.com/google/protobuf/releases)  
 
 * Google RPC  
