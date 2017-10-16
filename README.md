@@ -12,12 +12,12 @@ Developers can read a more detailed explanation of supported modules in the src 
 
 2.Prerequisites
 ---------------
-+Protocol Buffers
-    Version: > 3.0.0
-    Source: [I'm an inline-style link](https://github.com/google/protobuf/releases)
+..*Protocol Buffers
+Version: > 3.0.0
+[Source](https://github.com/google/protobuf/releases)
 
-+Google RPC
-    Source: [I'm an inline-style link](https://github.com/grpc/grpc/blob/master/INSTALL.md)
+..*Google RPC
+[Source](https://github.com/grpc/grpc/blob/master/INSTALL.md)
 
 # 3.Installation
 ----------------
