@@ -1,7 +1,7 @@
 LegoStore: Modular Multi-Version Transactional Key-Value Storage System v0.1
 ============================================================================
 
-1. Overview
+** 1. Overview
 ----------
 LegoStore is a modular distributed key-value storage system. In particular, LegoStore permits experimentation with different implementations for storage, transactional protocols, communication protocols, etc. Modularity is benefitial for two main reasons.
 
@@ -10,7 +10,7 @@ LegoStore is a modular distributed key-value storage system. In particular, Lego
 
 Developers can read a more detailed explanation of supported modules in the src directory. This README is oriented to explain installation and usage of LegoStore.
 
-2. Prerequisites
+** 2. Prerequisites
 ---------------
 * Protocol Buffers  
   Version: > 3.0.0  
@@ -19,7 +19,7 @@ Developers can read a more detailed explanation of supported modules in the src 
 * Google RPC  
   [Source](https://github.com/grpc/grpc/blob/master/INSTALL.md)  
 
-3. Installation
+** 3. Installation
 ----------------
 Simply follow the steps below.
 1. Download LegoStore from source (link missing).
@@ -27,6 +27,6 @@ Simply follow the steps below.
 3. `make`
 4. `make shell` for installing a shell that helps experimentation with LegoStore.
 
-4. Usage
+** 4. Usage
 ---------
 
