@@ -20,8 +20,14 @@ Instructions are suitable for Ubuntu 16.04 (possibly for other Ubuntu distributi
 * Google RPC - This packet is needed for RPC from coordinators to servers.  
   You can download the source and follow the instructions [here](https://github.com/grpc/grpc/blob/master/INSTALL.md)  
 
-* Packages `pkg-config`, `flex`, `bison` are also needed. Run the following command to install them:  
-  `sudo apt install pkg-config flex bison`
+* Package pkg-config - Needed for Google RPC.  
+  `sudo apt install pkg-config`  
+
+* Packages flex and bison - Needed for parsing and executing user's commands (shell).
+  `sudo apt install flex bison`  
+
+* Package doxygen - Needed for generating documentation.
+  `sudo apt install doxygen`
 
 Installation
 ------------
@@ -30,6 +36,7 @@ Simply follow the steps below.
 2. `cd LegoStore`
 3. `make`
 4. `make shell` for installing a shell that helps experimentation with LegoStore (optional).
+5. `make docs` for generating documentation (optional).
 
 Usage
 -----
