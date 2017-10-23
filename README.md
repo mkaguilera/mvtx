@@ -23,10 +23,10 @@ Instructions are suitable for Ubuntu 16.04 (possibly for other Ubuntu distributi
 * Package pkg-config - Needed for Google RPC.  
   `sudo apt install pkg-config`  
 
-* Packages flex and bison - Needed for parsing and executing user's commands (shell).
+* Packages flex and bison - Needed for parsing and executing user's commands (shell).  
   `sudo apt install flex bison`  
 
-* Package doxygen - Needed for generating documentation.
+* Package doxygen - Needed for generating documentation.  
   `sudo apt install doxygen`
 
 Installation
