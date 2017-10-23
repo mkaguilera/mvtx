@@ -12,12 +12,17 @@ Developers can read a more detailed explanation of supported modules in the src 
 
 Prerequisites
 -------------
+Instructions are suitable for Ubuntu 16.04 (possibly for other Ubuntu distributions as well)
+
 * Protocol Buffers - This packet is needed for serialization/deserialization of data transfered from coordinators to servers and vice versa.  
   Version: >= 3.0.0  
   [Source](https://github.com/google/protobuf/releases)  
 
 * Google RPC - This packet is needed for RPC from coordinators to servers.  
   [Source](https://github.com/grpc/grpc/blob/master/INSTALL.md)  
+
+* Packages `pkg-config`, `flex`, `bison` are also needed. Run the following command to install them:
+  `sudo apt install pkg-config flex bison`
 
 Installation
 ------------
