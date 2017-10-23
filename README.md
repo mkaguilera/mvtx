@@ -12,16 +12,16 @@ Developers can read a more detailed explanation of supported modules in the src 
 
 Prerequisites
 -------------
-* Protocol Buffers - This packet is needed for serialization/deserialization of data transfered from coordinators to servers and vice versa.
+* Protocol Buffers - This packet is needed for serialization/deserialization of data transfered from coordinators to servers and vice versa.  
   Version: >= 3.0.0  
   [Source](https://github.com/google/protobuf/releases)  
 
-* Google RPC - This packet is needed for RPC from coordinators to servers.
+* Google RPC - This packet is needed for RPC from coordinators to servers.  
   [Source](https://github.com/grpc/grpc/blob/master/INSTALL.md)  
 
 Installation
 ------------
-Simply follow the steps below.
+Simply follow the steps below.  
 1. Download LegoStore from source (link missing).
 2. `cd LegoStore`
 3. `make`
